@@ -44,6 +44,9 @@ func newZapLogger(level string) (Logger, error) {
 	    return nil, err
 	}
 
+	// skip the two newest calls in the call-stack, they are from this logging package and of no use.
+	logger = logger.WithOptions(zap.AddCallerSkip(2))
+
 
 	return &zapLogger{
 		sugared: logger.Sugar(),

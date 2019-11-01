@@ -4,26 +4,29 @@ import (
 	"context"
 	"sync"
 
+	"github.com/lukasjarosch/genki/cli"
 	"github.com/lukasjarosch/genki/logger"
 	"github.com/lukasjarosch/genki/server"
 	genki "github.com/lukasjarosch/genki/service"
 )
 
 type service struct {
-	opts Options
-	stopChan <-chan struct{}
+	opts       Options
+	stopChan   <-chan struct{}
 	appContext context.Context
-	cancel context.CancelFunc
-	wg sync.WaitGroup
+	cancel     context.CancelFunc
+	wg         sync.WaitGroup
+	flags      *cli.FlagSet
 }
 
 func newService(opts ...Option) *service {
 	options := newOptions(opts...)
 
-	svc :=  &service{
+	svc := &service{
 		opts:     options,
 		stopChan: genki.NewSignalHandler(),
-		wg: sync.WaitGroup{},
+		wg:       sync.WaitGroup{},
+		flags: cli.NewFlagSet(options.Name),
 	}
 
 	svc.appContext, svc.cancel = context.WithCancel(context.Background())
@@ -53,10 +56,13 @@ func (svc *service) Run() error {
 	return nil
 }
 
-func (svc *service) AddServer(srv server.Server)  {
+
+// AddServer registers a new server with the service
+func (svc *service) AddServer(srv server.Server) {
 	svc.opts.Servers = append(svc.opts.Servers, srv)
 }
 
+// Opts returns the internal options
 func (svc *service) Opts() Options {
 	return svc.opts
 }

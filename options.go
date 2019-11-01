@@ -4,6 +4,8 @@ import (
 	"github.com/lukasjarosch/genki/server"
 )
 
+const DefaultName = "genki"
+
 type Options struct {
 	Name string
 	Servers []server.Server
@@ -15,15 +17,9 @@ func Name(name string) Option {
 	}
 }
 
-func AddServer(srv server.Server) Option {
-	return func(opts *Options) {
-		opts.Servers = append(opts.Servers, srv)
-	}
-}
-
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Name:   "genki",
+		Name:   DefaultName,
 	}
 
 	for _, o := range opts {

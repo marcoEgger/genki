@@ -1,12 +1,15 @@
 package logger
 
+import (
+	"github.com/spf13/pflag"
+
+	"github.com/lukasjarosch/genki/config"
+)
+
 // Global log instance to be able to directly access the log functions
 var log Logger
 
-// ensures that the global logger is never null
-func init() {
-	_ = NewLogger(InfoLevel)
-}
+const DefaultLevel = InfoLevel
 
 type Logger interface {
 	Debug(fields ...interface{})
@@ -83,4 +86,18 @@ func Fatalf(format string, args ...interface{}) {
 
 func WithFields(keyValues Fields) Logger {
 	return log.WithFields(keyValues)
+}
+
+// Flags is a convenience function to quickly add the log options as CLI flags
+// Implements the cli.FlagProvider type
+func Flags() *pflag.FlagSet {
+	fs := pflag.NewFlagSet("logger", pflag.ContinueOnError)
+
+	fs.String(
+		config.LogLevel,
+		DefaultLevel,
+		"log level defines the lowest level of logs printed (debug, info, warn, error, fatal)",
+	)
+
+	return fs
 }
