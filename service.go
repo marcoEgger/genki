@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/lukasjarosch/genki/logger"
 	"github.com/lukasjarosch/genki/server"
 	genki "github.com/lukasjarosch/genki/service"
 )
@@ -45,6 +46,7 @@ func (svc *service) Run() error {
 
 	// wait for signal handler to fire and shutdown
 	<-svc.stopChan
+	logger.Info("received OS signal: service is shutting down")
 	svc.cancel()
 	svc.wg.Wait()
 
