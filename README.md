@@ -1,4 +1,4 @@
-# genki  - Microservice toolkit
+# genki  - microservice toolkit
 
 > Enki (𒂗𒆠) is the Sumerian god of knowledge, crafts and creation. 
 > Combine it with the awesome Go language, and you get Genki, my personal microservice toolkit.
