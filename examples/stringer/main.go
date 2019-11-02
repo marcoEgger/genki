@@ -41,6 +41,7 @@ func main() {
 	grpcServer := grpc.NewServer(
 		grpc.Port(config.GetString(config.GrpcPort)),
 		grpc.ShutdownGracePeriod(config.GetDuration(config.GrpcGracePeriod)),
+		grpc.EnableHealthServer(Service),
 	)
 	example.RegisterExampleServiceServer(grpcServer.Server(), &impl{})
 

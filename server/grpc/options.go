@@ -10,10 +10,13 @@ import (
 
 const DefaultPort = "50051"
 const DefaultGracePeriod = 3 * time.Second
+const DefaultHealthEnabled = false
 
 type Options struct {
 	Port                string
 	ShutdownGracePeriod time.Duration
+	HealthServerEnabled bool
+	serviceName string // only set if EnableHealthServer is called
 }
 
 func Port(addr string) Option {
@@ -28,10 +31,18 @@ func ShutdownGracePeriod(duration time.Duration) Option {
 	}
 }
 
+func EnableHealthServer(serviceName string) Option {
+	return func(opts *Options) {
+		opts.HealthServerEnabled = true
+		opts.serviceName = serviceName
+	}
+}
+
 func newOptions(opts ...Option) Options {
 	opt := Options{
 		Port:                DefaultPort,
 		ShutdownGracePeriod: DefaultGracePeriod,
+		HealthServerEnabled: DefaultHealthEnabled,
 	}
 
 	for _, o := range opts {
