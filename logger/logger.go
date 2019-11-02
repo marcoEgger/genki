@@ -36,10 +36,11 @@ const (
 	WarnLevel  = "warn"
 	ErrorLevel = "error"
 	FatalLevel = "fatal"
+	DefaultCallerSkip = 2
 )
 
 func NewLogger(level string) error {
-	logger, err := newZapLogger(level)
+	logger, err := newZapLogger(level, DefaultCallerSkip)
 	if err != nil {
 	    return err
 	}
@@ -91,6 +92,9 @@ func WithFields(keyValues Fields) Logger {
 	return log.WithFields(keyValues)
 }
 
+func WithContext(ctx context.Context) Logger {
+	return log.WithContext(ctx)
+}
 
 // Flags is a convenience function to quickly add the log options as CLI flags
 // Implements the cli.FlagProvider type

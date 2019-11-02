@@ -3,18 +3,17 @@ package logger
 import (
 	"context"
 
-	"github.com/lukasjarosch/genki/server/grpc/metadata"
-	"github.com/opentracing/opentracing-go"
-	zipkintracer "github.com/openzipkin-contrib/zipkin-go-opentracing"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/lukasjarosch/genki/server/grpc/metadata"
 )
 
 type zapLogger struct {
 	sugared *zap.SugaredLogger
 }
 
-func newZapLogger(level string) (Logger, error) {
+func newZapLogger(level string, callerskip int) (Logger, error) {
 	logLevel := parseStringLevel(level)
 
 	zapEncoderConfig := zapcore.EncoderConfig{
@@ -46,55 +45,54 @@ func newZapLogger(level string) (Logger, error) {
 
 	logger, err := zapConfig.Build()
 	if err != nil {
-	    return nil, err
+		return nil, err
 	}
 
 	// skip the two newest calls in the call-stack, they are from this logging package and of no use.
-	logger = logger.WithOptions(zap.AddCallerSkip(2))
-
+	logger = logger.WithOptions(zap.AddCallerSkip(callerskip))
 
 	return &zapLogger{
 		sugared: logger.Sugar(),
 	}, nil
 }
 
-func (l *zapLogger) Debug(fields ...interface{})  {
+func (l *zapLogger) Debug(fields ...interface{}) {
 	l.sugared.Debug(fields...)
 }
 
-func (l *zapLogger) Debugf(format string, fields ...interface{})  {
+func (l *zapLogger) Debugf(format string, fields ...interface{}) {
 	l.sugared.Debugf(format, fields...)
 }
 
-func (l *zapLogger) Info(fields ...interface{})  {
+func (l *zapLogger) Info(fields ...interface{}) {
 	l.sugared.Info(fields...)
 }
 
-func (l *zapLogger) Infof(format string, fields ...interface{})  {
+func (l *zapLogger) Infof(format string, fields ...interface{}) {
 	l.sugared.Infof(format, fields...)
 }
 
-func (l *zapLogger) Warn(fields ...interface{})  {
+func (l *zapLogger) Warn(fields ...interface{}) {
 	l.sugared.Info(fields...)
 }
 
-func (l *zapLogger) Warnf(format string, fields ...interface{})  {
+func (l *zapLogger) Warnf(format string, fields ...interface{}) {
 	l.sugared.Warnf(format, fields...)
 }
 
-func (l *zapLogger) Error(fields ...interface{})  {
+func (l *zapLogger) Error(fields ...interface{}) {
 	l.sugared.Info(fields...)
 }
 
-func (l *zapLogger) Errorf(format string, fields ...interface{})  {
+func (l *zapLogger) Errorf(format string, fields ...interface{}) {
 	l.sugared.Errorf(format, fields...)
 }
 
-func (l *zapLogger) Fatal(fields ...interface{})  {
+func (l *zapLogger) Fatal(fields ...interface{}) {
 	l.sugared.Info(fields...)
 }
 
-func (l *zapLogger) Fatalf(format string, fields ...interface{})  {
+func (l *zapLogger) Fatalf(format string, fields ...interface{}) {
 	l.sugared.Fatalf(format, fields...)
 }
 
@@ -110,22 +108,16 @@ func (l *zapLogger) WithFields(keyValues Fields) Logger {
 }
 
 func (l *zapLogger) WithContext(ctx context.Context) Logger {
-	var logger Logger
-	span, ok := opentracing.SpanFromContext(ctx).Context().(zipkintracer.SpanContext)
-	if ok {
-		logger = log.WithFields(Fields{
-			metadata.TraceID: span.TraceID.String(),
-		})
-	}
-
-	return logger.WithFields(
+	return log.WithFields(
 		Fields{
 			metadata.RequestID: metadata.GetRequestID(ctx),
+			metadata.AccountID: metadata.GetAccountID(ctx),
+			metadata.UserID: metadata.GetUserID(ctx),
 		},
 	)
 }
 
-func parseStringLevel(logLevel string) zap.AtomicLevel{
+func parseStringLevel(logLevel string) zap.AtomicLevel {
 	var level zap.AtomicLevel
 
 	switch logLevel {
