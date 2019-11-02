@@ -7,10 +7,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 
 	"github.com/lukasjarosch/genki/logger"
+	"github.com/lukasjarosch/genki/server/grpc/interceptor"
 )
 
 type server struct {
@@ -23,8 +25,23 @@ type server struct {
 
 func NewServer(opts ...Option) Server {
 	options := newOptions(opts...)
+	srv := &server{opts: options}
 
-	return &server{opts: options, grpc: grpc.NewServer()}
+	var unaryInterceptors []grpc.UnaryServerInterceptor
+	if srv.opts.RequestIdInterceptor {
+		logger.Debugf("grpc interceptor enabled: RequestId")
+		unaryInterceptors = append(unaryInterceptors, interceptor.RequestId())
+	}
+	if srv.opts.LoggingInterceptor {
+		logger.Debugf("grpc interceptor enabled: Logging")
+		unaryInterceptors = append(unaryInterceptors, interceptor.Logging())
+	}
+
+	srv.grpc = grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+		unaryInterceptors...
+	)))
+
+	return  srv
 }
 
 // ListenAndServe ties everything together and runs the gRPC server in a separate goroutine.
@@ -42,6 +59,8 @@ func (srv *server) ListenAndServe(ctx context.Context, wg *sync.WaitGroup) {
 		srv.setServingStatus(HealthNotServing)
 		logger.Fatalf("gRPC server could not be started: %s", err.Error())
 	}
+
+
 
 	go func() {
 		logger.Infof("gRPC server running on port %s", srv.opts.Port)
