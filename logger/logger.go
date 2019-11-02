@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"context"
+
 	"github.com/spf13/pflag"
 
 	"github.com/lukasjarosch/genki/config"
@@ -23,6 +25,7 @@ type Logger interface {
 	Fatal(fields ...interface{})
 	Fatalf(format string, args ...interface{})
 	WithFields(keyValues Fields) Logger
+	WithContext(ctx context.Context) Logger
 }
 
 type Fields map[string]interface{}
@@ -87,6 +90,7 @@ func Fatalf(format string, args ...interface{}) {
 func WithFields(keyValues Fields) Logger {
 	return log.WithFields(keyValues)
 }
+
 
 // Flags is a convenience function to quickly add the log options as CLI flags
 // Implements the cli.FlagProvider type

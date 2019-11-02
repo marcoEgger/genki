@@ -1,6 +1,11 @@
 package logger
 
 import (
+	"context"
+
+	"github.com/lukasjarosch/genki/server/grpc/metadata"
+	"github.com/opentracing/opentracing-go"
+	zipkintracer "github.com/openzipkin-contrib/zipkin-go-opentracing"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -102,6 +107,22 @@ func (l *zapLogger) WithFields(keyValues Fields) Logger {
 
 	newLogger := l.sugared.With(f...)
 	return &zapLogger{newLogger}
+}
+
+func (l *zapLogger) WithContext(ctx context.Context) Logger {
+	var logger Logger
+	span, ok := opentracing.SpanFromContext(ctx).Context().(zipkintracer.SpanContext)
+	if ok {
+		logger = log.WithFields(Fields{
+			metadata.TraceID: span.TraceID.String(),
+		})
+	}
+
+	return logger.WithFields(
+		Fields{
+			metadata.RequestID: metadata.GetRequestID(ctx),
+		},
+	)
 }
 
 func parseStringLevel(logLevel string) zap.AtomicLevel{
