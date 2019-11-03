@@ -118,6 +118,12 @@ func (l *zapLogger) WithMetadata(ctx context.Context) Logger {
 	if reqID, ok := md[metadata.RequestIDKey]; ok {
 		fields[metadata.RequestIDKey] = reqID
 	}
+	if accID, ok := md[metadata.AccountIDKey]; ok {
+		fields[metadata.AccountIDKey] = accID
+	}
+	if userID, ok := md[metadata.UserIDKey]; ok {
+		fields[metadata.UserIDKey] = userID
+	}
 
 	return log.WithFields(fields)
 }
