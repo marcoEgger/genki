@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/lukasjarosch/genki/server/grpc/metadata"
+	"github.com/lukasjarosch/genki/metadata"
 )
 
 type zapLogger struct {
@@ -107,14 +107,19 @@ func (l *zapLogger) WithFields(keyValues Fields) Logger {
 	return &zapLogger{newLogger}
 }
 
-func (l *zapLogger) WithContext(ctx context.Context) Logger {
-	return log.WithFields(
-		Fields{
-			metadata.RequestID: metadata.GetRequestID(ctx),
-			metadata.AccountID: metadata.GetAccountID(ctx),
-			metadata.UserID: metadata.GetUserID(ctx),
-		},
-	)
+func (l *zapLogger) WithMetadata(ctx context.Context) Logger {
+	md, ok := metadata.FromContext(ctx)
+	if !ok {
+		return log
+	}
+
+	fields := make(Fields)
+
+	if reqID, ok := md[metadata.RequestIDKey]; ok {
+		fields[metadata.RequestIDKey] = reqID
+	}
+
+	return log.WithFields(fields)
 }
 
 func parseStringLevel(logLevel string) zap.AtomicLevel {
