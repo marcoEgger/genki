@@ -25,14 +25,20 @@ func NewServer(opts ...Option) Server {
 	}
 }
 
+// Handle registers the given endpoint pattern and handler to the server's http muliplexer.
+// If the server has middleware enabled, then the enabled middleware is also added.
+// The call order is the inverse registration call order.
+// The 'Metadata' middleware is always the first middleware. It cannot be disabled.
 func (srv *server) Handle(endpoint string, handler http.Handler) {
 	if srv.opts.LoggingMiddlewareEnabled {
 		handler = middleware.Logging(handler)
 	}
-
+	handler = middleware.Metadata(handler)
 	srv.mux.Handle(endpoint, handler)
 }
 
+// ListenAndServe the server in a separate goroutine.
+// Will block until the context is done.
 func (srv *server) ListenAndServe(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
@@ -53,6 +59,7 @@ func (srv *server) ListenAndServe(ctx context.Context, wg *sync.WaitGroup) {
 	<-ctx.Done()
 }
 
+// shutdown gracefully terminates the server with the configured grace period timeout.
 func (srv *server) shutdown() {
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), srv.opts.ShutdownGracePeriod)
 	defer cancel()
