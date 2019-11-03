@@ -5,6 +5,7 @@ import (
 	"github.com/lukasjarosch/genki/server"
 )
 
+// Service defines the application interface. It's designed to be simple and straightforward.
 type Service interface {
 	// Name of the service
 	Name() string

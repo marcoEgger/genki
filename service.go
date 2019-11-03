@@ -39,10 +39,16 @@ func newService(opts ...Option) *service {
 	return svc
 }
 
+// Name gives the whole thing a name. Good things have names :)
 func (svc *service) Name() string {
 	return svc.opts.Name
 }
 
+// Run will start everything and wait for an os signal to stop.
+// - If the HTTP debug server is enabled, it is added to the server list
+// - If a broker is configured, Declare() and Consume() are called
+// - Every server in the serverlist is started
+// - Wait for signal...
 func (svc *service) Run() error {
 	defer svc.cancel()
 
@@ -82,22 +88,9 @@ func (svc *service) AddServer(srv server.Server) {
 	svc.servers = append(svc.servers, srv)
 }
 
+// Add a broker to the service. The broker is invoked in Run().
 func (svc *service) RegisterBroker(broker broker.Broker) {
 	svc.broker = broker
-}
-
-func (svc *service) AddSubscription(exchangeName, queueName, routingKey string, handler broker.Subscriber) error {
-	if svc.broker == nil {
-		return fmt.Errorf("no broker configured, cannot continue")
-	}
-	return svc.broker.AddSubscription(exchangeName, queueName, routingKey, handler)
-}
-
-func (svc *service) AddPublisher(exchangeName, routingKey string) error {
-	if svc.broker == nil {
-		return fmt.Errorf("no broker configured, cannot continue")
-	}
-	return svc.broker.AddPublisher(exchangeName, routingKey)
 }
 
 // Opts returns the internal options
