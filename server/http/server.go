@@ -68,9 +68,9 @@ func (srv *server) shutdown() {
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), srv.opts.ShutdownGracePeriod)
 	defer cancel()
 	if err := srv.httpServer.Shutdown(shutdownCtx); err != nil {
-		logger.Warnf("gRPC graceful shutdown timed-out: %s", err.Error())
+		logger.Warnf("HTTP '%s' graceful shutdown timed-out: %s", srv.opts.Name, err.Error())
 	} else {
-		logger.Info("HTTP server shut-down gracefully")
+		logger.Infof("HTTP server '%s' shut-down gracefully", srv.opts.Name)
 	}
 }
 

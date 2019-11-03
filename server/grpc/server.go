@@ -98,9 +98,9 @@ func (srv *server) shutdown() {
 	t := time.NewTicker(srv.opts.ShutdownGracePeriod)
 	select {
 	case <-t.C:
-		logger.Warnf("gRPC graceful shutdown timed-out")
+		logger.Warnf("gRPC server '%s' graceful shutdown timed-out", srv.opts.Name)
 	case <-stopped:
-		logger.Info("gRPC server shut-down gracefully")
+		logger.Infof("gRPC server '%s' shut-down gracefully", srv.opts.Name)
 		t.Stop()
 	}
 }
