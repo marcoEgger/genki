@@ -4,8 +4,6 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
-
-	"github.com/lukasjarosch/genki/config"
 )
 
 const DefaultPort = "8080"
@@ -68,12 +66,12 @@ func Flags() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("http-server", pflag.ContinueOnError)
 
 	fs.String(
-		config.HttpPort,
+		PortConfigKey,
 		DefaultPort,
 		"the port on which the HTTP server is listening on",
 	)
 	fs.Duration(
-		config.HttpGracePeriod,
+		GracePeriodConfigKey,
 		DefaultGracePeriod,
 		"grace period after which the server shutdown is terminated",
 	)

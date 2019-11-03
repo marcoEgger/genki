@@ -4,8 +4,6 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
-
-	"github.com/lukasjarosch/genki/config"
 )
 
 const DefaultPort = "50051"
@@ -99,12 +97,12 @@ func Flags() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("grpc-server", pflag.ContinueOnError)
 
 	fs.String(
-		config.GrpcPort,
+		PortConfigKey,
 		DefaultPort,
 		"the port on which the gRPC server is listening on",
 	)
 	fs.Duration(
-		config.GrpcGracePeriod,
+		GracePeriodConfigKey,
 		DefaultGracePeriod,
 		"grace period after which the server shutdown is terminated",
 	)

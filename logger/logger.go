@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"github.com/spf13/pflag"
-
-	"github.com/lukasjarosch/genki/config"
 )
 
 // Global log instance to be able to directly access the log functions
@@ -37,6 +35,7 @@ const (
 	ErrorLevel = "error"
 	FatalLevel = "fatal"
 	DefaultCallerSkip = 2
+	LogLevelConfigKey = "log-level"
 )
 
 func NewLogger(level string) error {
@@ -102,7 +101,7 @@ func Flags() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("logger", pflag.ContinueOnError)
 
 	fs.String(
-		config.LogLevel,
+		LogLevelConfigKey,
 		DefaultLevel,
 		"log level defines the lowest level of logs printed (debug, info, warn, error, fatal)",
 	)

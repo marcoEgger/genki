@@ -34,7 +34,7 @@ func init() {
 }
 
 func main() {
-	if err := logger.NewLogger(config.GetString(config.LogLevel)); err != nil {
+	if err := logger.NewLogger(config.GetString(logger.LogLevelConfigKey)); err != nil {
 		log.Fatal(err.Error())
 	}
 
@@ -60,8 +60,8 @@ func main() {
 	// setup gRPC server
 	grpcServer := grpc.NewServer(
 		grpc.Name(Service),
-		grpc.Port(config.GetString(config.GrpcPort)),
-		grpc.ShutdownGracePeriod(config.GetDuration(config.GrpcGracePeriod)),
+		grpc.Port(config.GetString(grpc.PortConfigKey)),
+		grpc.ShutdownGracePeriod(config.GetDuration(grpc.GracePeriodConfigKey)),
 		grpc.EnableHealthServer(Service),
 	)
 	example.RegisterExampleServiceServer(grpcServer.Server(), &impl{
