@@ -36,6 +36,10 @@ func NewServer(opts ...Option) Server {
 		logger.Debugf("grpc interceptor enabled: Logging")
 		unaryInterceptors = append(unaryInterceptors, interceptor.Logging())
 	}
+	if srv.opts.enabledUnaryInterceptor.prometheus {
+		logger.Debugf("grpc interceptor enabled: Prometheus")
+		unaryInterceptors = append(unaryInterceptors, interceptor.Prometheus())
+	}
 
 	srv.grpc = grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 		unaryInterceptors...
@@ -57,17 +61,15 @@ func (srv *server) ListenAndServe(ctx context.Context, wg *sync.WaitGroup) {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", srv.opts.Port))
 	if err != nil {
 		srv.setServingStatus(HealthNotServing)
-		logger.Fatalf("gRPC server could not be started: %s", err.Error())
+		logger.Fatalf("gRPC server '%s' could not be started: %s", srv.opts.Name, err.Error())
 	}
 
-
-
 	go func() {
-		logger.Infof("gRPC server running on port %s", srv.opts.Port)
+		logger.Infof("gRPC server '%s' running on port %s", srv.opts.Name, srv.opts.Port)
 		srv.setServingStatus(HealthServing)
 		if err := srv.grpc.Serve(listener); err != nil {
 			srv.setServingStatus(HealthNotServing)
-			logger.Errorf("gRPC server crashed: %s", err.Error())
+			logger.Errorf("gRPC server '%s' crashed: %s", srv.opts.Name, err.Error())
 			return
 		}
 	}()

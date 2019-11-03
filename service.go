@@ -7,6 +7,7 @@ import (
 	"github.com/lukasjarosch/genki/cli"
 	"github.com/lukasjarosch/genki/logger"
 	"github.com/lukasjarosch/genki/server"
+	"github.com/lukasjarosch/genki/server/http"
 	genki "github.com/lukasjarosch/genki/service"
 )
 
@@ -40,6 +41,11 @@ func (svc *service) Name() string {
 
 func (svc *service) Run() error {
 	defer svc.cancel()
+
+	// add the debug HTTP server if enabled
+	if svc.opts.DebugHtpServerEnabled {
+		svc.AddServer(http.NewDebugServer())
+	}
 
 	// start all registered servers in a goroutine
 	for _, srv := range svc.opts.Servers {

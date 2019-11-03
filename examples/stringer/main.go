@@ -39,21 +39,15 @@ func main() {
 
 	// setup gRPC server
 	grpcServer := grpc.NewServer(
+		grpc.Name(Service),
 		grpc.Port(config.GetString(config.GrpcPort)),
 		grpc.ShutdownGracePeriod(config.GetDuration(config.GrpcGracePeriod)),
 		grpc.EnableHealthServer(Service),
 	)
 	example.RegisterExampleServiceServer(grpcServer.Server(), &impl{})
 
-	// setup HTTP server
-	httpServer := http.NewServer(
-		http.Port("3000"),
-		http.Handler(nil),
-	)
-
 	// register servers
 	app.AddServer(grpcServer)
-	app.AddServer(httpServer)
 
 	// run application
 	if err := app.Run(); err != nil {

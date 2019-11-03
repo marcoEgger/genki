@@ -1,7 +1,6 @@
 package http
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/spf13/pflag"
@@ -14,8 +13,8 @@ const DefaultGracePeriod = 3 * time.Second
 
 type Options struct {
 	Port                string
+	Name                string
 	ShutdownGracePeriod time.Duration
-	Handler http.Handler
 }
 
 func Port(addr string) Option {
@@ -30,16 +29,18 @@ func ShutdownGracePeriod(duration time.Duration) Option {
 	}
 }
 
-func Handler(handler http.Handler) Option {
+func Name(name string) Option {
 	return func(opts *Options) {
-		opts.Handler = handler
+		opts.Name = name
 	}
 }
+
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
 		Port:                DefaultPort,
 		ShutdownGracePeriod: DefaultGracePeriod,
+		Name: "default",
 	}
 
 	for _, o := range opts {

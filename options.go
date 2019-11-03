@@ -5,10 +5,12 @@ import (
 )
 
 const DefaultName = "genki"
+const DefaultDebugHttpServerEnabled = true
 
 type Options struct {
 	Name string
 	Servers []server.Server
+	DebugHtpServerEnabled bool
 }
 
 func Name(name string) Option {
@@ -17,9 +19,16 @@ func Name(name string) Option {
 	}
 }
 
+func DisableDebugHttpServer() Option {
+	return func(opts *Options) {
+		opts.DebugHtpServerEnabled = false
+	}
+}
+
 func newOptions(opts ...Option) Options {
 	opt := Options{
 		Name:   DefaultName,
+		DebugHtpServerEnabled: DefaultDebugHttpServerEnabled,
 	}
 
 	for _, o := range opts {
