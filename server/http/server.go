@@ -60,6 +60,7 @@ func (srv *server) ListenAndServe(ctx context.Context, wg *sync.WaitGroup) {
 	}()
 
 	<-ctx.Done()
+	srv.shutdown()
 }
 
 // shutdown gracefully terminates the server with the configured grace period timeout.
