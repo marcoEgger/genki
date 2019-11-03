@@ -10,11 +10,14 @@ import (
 
 const DefaultPort = "8080"
 const DefaultGracePeriod = 3 * time.Second
+const DefaultName = "default"
+const DefaultLoggingMiddlewareEnabled = true
 
 type Options struct {
-	Port                string
-	Name                string
-	ShutdownGracePeriod time.Duration
+	Port                     string
+	Name                     string
+	ShutdownGracePeriod      time.Duration
+	LoggingMiddlewareEnabled bool
 }
 
 func Port(addr string) Option {
@@ -35,12 +38,18 @@ func Name(name string) Option {
 	}
 }
 
+func DisableLoggingMiddleware() Option {
+	return func(opts *Options) {
+		opts.LoggingMiddlewareEnabled = false
+	}
+}
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Port:                DefaultPort,
-		ShutdownGracePeriod: DefaultGracePeriod,
-		Name: "default",
+		Port:                     DefaultPort,
+		ShutdownGracePeriod:      DefaultGracePeriod,
+		Name:                     DefaultName,
+		LoggingMiddlewareEnabled: DefaultLoggingMiddlewareEnabled,
 	}
 
 	for _, o := range opts {

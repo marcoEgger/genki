@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/lukasjarosch/genki/logger"
+	"github.com/lukasjarosch/genki/server/http/middleware"
 )
 
 type server struct {
@@ -25,6 +26,10 @@ func NewServer(opts ...Option) Server {
 }
 
 func (srv *server) Handle(endpoint string, handler http.Handler) {
+	if srv.opts.LoggingMiddlewareEnabled {
+		handler = middleware.Logging(handler)
+	}
+
 	srv.mux.Handle(endpoint, handler)
 }
 
