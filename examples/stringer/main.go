@@ -5,8 +5,10 @@ import (
 	"log"
 
 	"github.com/spf13/pflag"
+	amqp2 "github.com/streadway/amqp"
 
 	"github.com/lukasjarosch/genki"
+	"github.com/lukasjarosch/genki/broker/amqp"
 	"github.com/lukasjarosch/genki/cli"
 	"github.com/lukasjarosch/genki/config"
 	"github.com/lukasjarosch/genki/logger"
@@ -25,6 +27,7 @@ func init() {
 	flags.Add(logger.Flags)
 	flags.Add(http.Flags)
 	flags.Add(grpc.Flags)
+	flags.Add(amqp.Flags)
 	flags.Add(Flags)
 	flags.Parse()
 	config.BindFlagSet(flags.Set())
@@ -35,7 +38,25 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+
+	// setup broker
+	amqpBroker := amqp.NewSession(config.GetString(amqp.UrlConfigKey))
+
+
 	app := genki.NewService()
+	app.RegisterBroker(amqpBroker)
+
+	h1 := func(delivery interface{}) {
+		event := delivery.(amqp2.Delivery)
+		logger.Info("OHAI")
+		event.Ack(false)
+	}
+	if err := app.AddPublisher("test", "some.key"); err != nil {
+		logger.Warnf("failed to add publisher to exchange '%s' with routing key '%s': %s", "test", "some.key", err)
+	}
+	if err := app.AddSubscription("test", "test-queue", "some.key", h1); err != nil {
+		logger.Warnf("failed to add subscription to routing key '%s': %s", err)
+	}
 
 	// setup gRPC server
 	grpcServer := grpc.NewServer(
@@ -44,12 +65,16 @@ func main() {
 		grpc.ShutdownGracePeriod(config.GetDuration(config.GrpcGracePeriod)),
 		grpc.EnableHealthServer(Service),
 	)
-	example.RegisterExampleServiceServer(grpcServer.Server(), &impl{})
+	example.RegisterExampleServiceServer(grpcServer.Server(), &impl{
+		publisher:amqpBroker,
+	})
 
 	// register servers
 	app.AddServer(grpcServer)
+	app.AddServer(http.NewServer())
+	app.AddServer(http.NewServer(http.Port("12345"), http.Name("pizza")))
 
-	// run application
+	// off we go...
 	if err := app.Run(); err != nil {
 		log.Fatal(err.Error())
 	}
@@ -57,9 +82,15 @@ func main() {
 
 // impl is a quick and dirty handler implementation
 type impl struct {
+	publisher amqp.Publisher
 }
 
 func (i *impl) Hello(ctx context.Context, request *example.HelloRequest) (*example.HelloResponse, error) {
+
+	if err := i.publisher.Publish("some.key", &example.Greeting{}); err != nil {
+		logger.Warnf("failed to publish to '%s': %s", "some.key", err)
+	}
+
 	return &example.HelloResponse{
 		Greeting:             &example.Greeting{
 			Template:             "Ohai there %s",

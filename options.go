@@ -1,15 +1,10 @@
 package genki
 
-import (
-	"github.com/lukasjarosch/genki/server"
-)
-
 const DefaultName = "genki"
 const DefaultDebugHttpServerEnabled = true
 
 type Options struct {
 	Name string
-	Servers []server.Server
 	DebugHtpServerEnabled bool
 }
 

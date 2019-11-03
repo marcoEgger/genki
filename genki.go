@@ -1,6 +1,9 @@
 package genki
 
-import "github.com/lukasjarosch/genki/server"
+import (
+	"github.com/lukasjarosch/genki/broker"
+	"github.com/lukasjarosch/genki/server"
+)
 
 type Service interface {
 	// Name of the service
@@ -12,6 +15,11 @@ type Service interface {
 	Opts() Options
 	// AddServer registers a new server with the application
 	AddServer(server server.Server)
+	// RegisterBroker registers a message broker implementation (AMQP, NATS, ...)
+	RegisterBroker(broker broker.Broker)
+
+	broker.SubscriptionCreator
+	broker.PublishCreator
 }
 
 type Option func(options *Options)
