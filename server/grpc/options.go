@@ -14,13 +14,17 @@ const DefaultHealthEnabled = false
 const DefaultLoggingInterceptor = true
 const DefaultRequestIdInterceptor = true
 
+type enabledInterceptor struct {
+	logging   bool
+	requestId bool
+}
+
 type Options struct {
-	Port                 string
-	ShutdownGracePeriod  time.Duration
-	HealthServerEnabled  bool
-	serviceName          string // only set if EnableHealthServer is called
-	LoggingInterceptor   bool
-	RequestIdInterceptor bool
+	Port                    string
+	ShutdownGracePeriod     time.Duration
+	HealthServerEnabled     bool
+	serviceName             string // only set if EnableHealthServer is called
+	enabledUnaryInterceptor enabledInterceptor
 }
 
 func Port(addr string) Option {
@@ -44,13 +48,13 @@ func EnableHealthServer(serviceName string) Option {
 
 func DisableLoggingInterceptor() Option {
 	return func(opts *Options) {
-		opts.LoggingInterceptor = false
+		opts.enabledUnaryInterceptor.logging = false
 	}
 }
 
 func DisableRequestIdInterceptor() Option {
 	return func(opts *Options) {
-		opts.RequestIdInterceptor = false
+		opts.enabledUnaryInterceptor.requestId = false
 	}
 }
 
@@ -59,8 +63,10 @@ func newOptions(opts ...Option) Options {
 		Port:                DefaultPort,
 		ShutdownGracePeriod: DefaultGracePeriod,
 		HealthServerEnabled: DefaultHealthEnabled,
-		LoggingInterceptor:  DefaultLoggingInterceptor,
-		RequestIdInterceptor:  DefaultRequestIdInterceptor,
+		enabledUnaryInterceptor: enabledInterceptor{
+			logging:   DefaultLoggingInterceptor,
+			requestId: DefaultRequestIdInterceptor,
+		},
 	}
 
 	for _, o := range opts {

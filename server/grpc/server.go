@@ -28,11 +28,11 @@ func NewServer(opts ...Option) Server {
 	srv := &server{opts: options}
 
 	var unaryInterceptors []grpc.UnaryServerInterceptor
-	if srv.opts.RequestIdInterceptor {
+	if srv.opts.enabledUnaryInterceptor.requestId {
 		logger.Debugf("grpc interceptor enabled: RequestId")
 		unaryInterceptors = append(unaryInterceptors, interceptor.RequestId())
 	}
-	if srv.opts.LoggingInterceptor {
+	if srv.opts.enabledUnaryInterceptor.logging {
 		logger.Debugf("grpc interceptor enabled: Logging")
 		unaryInterceptors = append(unaryInterceptors, interceptor.Logging())
 	}
