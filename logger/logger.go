@@ -25,7 +25,7 @@ type Logger interface {
 	Fatal(fields ...interface{})
 	Fatalf(format string, args ...interface{})
 	WithFields(keyValues Fields) Logger
-	WithContext(ctx context.Context) Logger
+	WithMetadata(ctx context.Context) Logger
 }
 
 type Fields map[string]interface{}
@@ -93,7 +93,7 @@ func WithFields(keyValues Fields) Logger {
 }
 
 func WithContext(ctx context.Context) Logger {
-	return log.WithContext(ctx)
+	return log.WithMetadata(ctx)
 }
 
 // Flags is a convenience function to quickly add the log options as CLI flags
