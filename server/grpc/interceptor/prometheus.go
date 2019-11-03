@@ -28,6 +28,7 @@ var (
 
 func init() {
 	_ = prometheus.Register(requestDuration)
+	_ = prometheus.Register(requestsCurrent)
 }
 
 // Prometheus adds basic RED metrics on all endpoints. The transport layer (gRPC) should also have metrics attached and
@@ -54,6 +55,7 @@ func Prometheus() grpc.UnaryServerInterceptor {
 				"method":      rpcName,
 				"status_code": stat,
 			}).Observe(float64(duration.Milliseconds()))
+
 			requestsCurrent.With(prometheus.Labels{
 				"method": rpcName,
 			}).Dec()

@@ -12,13 +12,14 @@ const DefaultPort = "8080"
 const DefaultGracePeriod = 3 * time.Second
 const DefaultName = "default"
 const DefaultLoggingMiddlewareEnabled = true
-const DefaultRequestIdMiddlewareEnabled = true
+const DefaultPrometheusMiddlewareEnabled = true
 
 type Options struct {
 	Port                       string
 	Name                       string
 	ShutdownGracePeriod        time.Duration
 	LoggingMiddlewareEnabled   bool
+	PrometheusMiddlewareEnabled bool
 }
 
 func Port(addr string) Option {
@@ -51,6 +52,7 @@ func newOptions(opts ...Option) Options {
 		ShutdownGracePeriod:        DefaultGracePeriod,
 		Name:                       DefaultName,
 		LoggingMiddlewareEnabled:   DefaultLoggingMiddlewareEnabled,
+		PrometheusMiddlewareEnabled:DefaultPrometheusMiddlewareEnabled,
 	}
 
 	for _, o := range opts {

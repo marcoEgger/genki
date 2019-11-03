@@ -33,6 +33,9 @@ func (srv *server) Handle(endpoint string, handler http.Handler) {
 	if srv.opts.LoggingMiddlewareEnabled {
 		handler = middleware.Logging(handler)
 	}
+	if srv.opts.PrometheusMiddlewareEnabled {
+		handler = middleware.Prometheus(handler)
+	}
 	handler = middleware.Metadata(handler)
 	srv.mux.Handle(endpoint, handler)
 }
