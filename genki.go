@@ -17,9 +17,6 @@ type Service interface {
 	AddServer(server server.Server)
 	// RegisterBroker registers a message broker implementation (AMQP, NATS, ...)
 	RegisterBroker(broker broker.Broker)
-
-	broker.SubscriptionCreator
-	broker.PublishCreator
 }
 
 type Option func(options *Options)

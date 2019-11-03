@@ -41,22 +41,21 @@ func main() {
 
 	// setup broker
 	amqpBroker := amqp.NewSession(config.GetString(amqp.UrlConfigKey))
+	h1 := func(delivery interface{}) {
+		event := delivery.(amqp2.Delivery)
+		logger.Info("OHAI")
+		_ = event.Ack(false)
+	}
+	if err := amqpBroker.AddPublisher("test", "some.key"); err != nil {
+		logger.Warnf("failed to add publisher to exchange '%s' with routing key '%s': %s", "test", "some.key", err)
+	}
+	if err := amqpBroker.AddSubscription("test", "test-queue", "some.key", h1); err != nil {
+		logger.Warnf("failed to add subscription to routing key '%s': %s", err)
+	}
 
 
 	app := genki.NewService()
 	app.RegisterBroker(amqpBroker)
-
-	h1 := func(delivery interface{}) {
-		event := delivery.(amqp2.Delivery)
-		logger.Info("OHAI")
-		event.Ack(false)
-	}
-	if err := app.AddPublisher("test", "some.key"); err != nil {
-		logger.Warnf("failed to add publisher to exchange '%s' with routing key '%s': %s", "test", "some.key", err)
-	}
-	if err := app.AddSubscription("test", "test-queue", "some.key", h1); err != nil {
-		logger.Warnf("failed to add subscription to routing key '%s': %s", err)
-	}
 
 	// setup gRPC server
 	grpcServer := grpc.NewServer(
