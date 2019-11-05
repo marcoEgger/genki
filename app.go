@@ -13,7 +13,7 @@ import (
 	genki "github.com/lukasjarosch/genki/service"
 )
 
-type service struct {
+type application struct {
 	servers    []server.Server
 	broker     broker.Broker
 	opts       Options
@@ -24,10 +24,10 @@ type service struct {
 	flags      *cli.FlagSet
 }
 
-func newService(opts ...Option) *service {
+func newService(opts ...Option) *application {
 	options := newOptions(opts...)
 
-	svc := &service{
+	svc := &application{
 		opts:     options,
 		stopChan: genki.NewSignalHandler(),
 		wg:       sync.WaitGroup{},
@@ -40,7 +40,7 @@ func newService(opts ...Option) *service {
 }
 
 // Name gives the whole thing a name. Good things have names :)
-func (svc *service) Name() string {
+func (svc *application) Name() string {
 	return svc.opts.Name
 }
 
@@ -49,7 +49,7 @@ func (svc *service) Name() string {
 // - If a broker is configured, Declare() and Consume() are called
 // - Every server in the serverlist is started
 // - Wait for signal...
-func (svc *service) Run() error {
+func (svc *application) Run() error {
 	defer svc.cancel()
 
 	// add the debug HTTP server if enabled
@@ -73,7 +73,7 @@ func (svc *service) Run() error {
 
 	// wait for signal handler to fire and shutdown
 	<-svc.stopChan
-	logger.Info("received OS signal: service is shutting down")
+	logger.Info("received OS signal: application is shutting down")
 	if svc.broker != nil {
 		svc.broker.Shutdown()
 	}
@@ -83,17 +83,17 @@ func (svc *service) Run() error {
 	return nil
 }
 
-// AddServer registers a new server with the service
-func (svc *service) AddServer(srv server.Server) {
+// AddServer registers a new server with the application
+func (svc *application) AddServer(srv server.Server) {
 	svc.servers = append(svc.servers, srv)
 }
 
-// Add a broker to the service. The broker is invoked in Run().
-func (svc *service) RegisterBroker(broker broker.Broker) {
+// Add a broker to the application. The broker is invoked in Run().
+func (svc *application) RegisterBroker(broker broker.Broker) {
 	svc.broker = broker
 }
 
 // Opts returns the internal options
-func (svc *service) Opts() Options {
+func (svc *application) Opts() Options {
 	return svc.opts
 }

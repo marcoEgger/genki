@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/spf13/pflag"
+
+	"github.com/lukasjarosch/genki/config"
 )
 
 // Global log instance to be able to directly access the log functions
@@ -29,11 +31,11 @@ type Logger interface {
 type Fields map[string]interface{}
 
 const (
-	DebugLevel = "debug"
-	InfoLevel  = "info"
-	WarnLevel  = "warn"
-	ErrorLevel = "error"
-	FatalLevel = "fatal"
+	DebugLevel        = "debug"
+	InfoLevel         = "info"
+	WarnLevel         = "warn"
+	ErrorLevel        = "error"
+	FatalLevel        = "fatal"
 	DefaultCallerSkip = 2
 	LogLevelConfigKey = "log-level"
 )
@@ -41,7 +43,7 @@ const (
 func NewLogger(level string) error {
 	logger, err := newZapLogger(level, DefaultCallerSkip)
 	if err != nil {
-	    return err
+		return err
 	}
 	log = logger
 	return nil
@@ -107,4 +109,14 @@ func Flags() *pflag.FlagSet {
 	)
 
 	return fs
+}
+
+// EnsureLoggerFromConfig is a convenience function to quickly create a new logger from
+// the configuration.
+// This requires that the configuration has already be bound from the flags.
+// The function will FATAL if the logger could not be created.
+func EnsureLoggerFromConfig() {
+	if err := NewLogger(config.GetString(LogLevelConfigKey)); err != nil {
+		log.Fatal(err.Error())
+	}
 }

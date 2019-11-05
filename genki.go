@@ -5,11 +5,11 @@ import (
 	"github.com/lukasjarosch/genki/server"
 )
 
-// Service defines the application interface. It's designed to be simple and straightforward.
-type Service interface {
-	// Name of the service
+// Application defines the application interface. It's designed to be simple and straightforward.
+type Application interface {
+	// Name of the application
 	Name() string
-	// Run the service. This is a blocking call and will only return if the
+	// Run the application. This is a blocking call and will only return if the
 	// server is shut-down or an error occurred.
 	Run() error
 	// Opts returns the current options
@@ -22,6 +22,6 @@ type Service interface {
 
 type Option func(options *Options)
 
-func NewService(options ...Option) Service {
+func NewApplication(options ...Option) Application {
 	return newService(options...)
 }

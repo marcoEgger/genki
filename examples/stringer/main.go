@@ -53,7 +53,7 @@ func main() {
 	implementation := greeting.NewServiceImplementation(amqpBroker)
 
 	// transport layer
-	app := genki.NewService()
+	app := genki.NewApplication()
 	app.RegisterBroker(amqpBroker)
 
 	// setup gRPC server
