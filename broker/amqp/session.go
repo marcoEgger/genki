@@ -13,9 +13,6 @@ import (
 	"github.com/lukasjarosch/genki/logger"
 )
 
-type Publisher interface {
-	Publish(routingKey string, event interface{}) error
-}
 
 type PublishExchange string
 

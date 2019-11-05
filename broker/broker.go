@@ -20,3 +20,7 @@ type Broker interface {
 }
 
 type Subscriber func(delivery interface{})
+
+type Publisher interface {
+	Publish(routingKey string, event interface{}) error
+}

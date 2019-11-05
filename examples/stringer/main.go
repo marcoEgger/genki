@@ -8,6 +8,7 @@ import (
 	amqp2 "github.com/streadway/amqp"
 
 	"github.com/lukasjarosch/genki"
+	"github.com/lukasjarosch/genki/broker"
 	"github.com/lukasjarosch/genki/broker/amqp"
 	"github.com/lukasjarosch/genki/cli"
 	"github.com/lukasjarosch/genki/config"
@@ -38,7 +39,6 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-
 	// setup broker
 	amqpBroker := amqp.NewSession(config.GetString(amqp.UrlConfigKey))
 	h1 := func(delivery interface{}) {
@@ -52,7 +52,6 @@ func main() {
 	if err := amqpBroker.AddSubscription("test", "test-queue", "some.key", h1); err != nil {
 		logger.Warnf("failed to add subscription to routing key '%s': %s", err)
 	}
-
 
 	app := genki.NewService()
 	app.RegisterBroker(amqpBroker)
@@ -81,7 +80,7 @@ func main() {
 
 // impl is a quick and dirty handler implementation
 type impl struct {
-	publisher amqp.Publisher
+	publisher broker.Publisher
 }
 
 func (i *impl) Hello(ctx context.Context, request *example.HelloRequest) (*example.HelloResponse, error) {
