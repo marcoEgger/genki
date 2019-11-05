@@ -8,7 +8,7 @@ import (
 
 const DefaultPort = "50051"
 const DefaultGracePeriod = 3 * time.Second
-const DefaultHealthEnabled = false
+const DefaultHealthEnabled = true
 const DefaultLoggingInterceptor = true
 const DefaultRequestIdInterceptor = true
 const DefaultPrometheusInterceptor = true
@@ -24,7 +24,6 @@ type Options struct {
 	Name                    string
 	ShutdownGracePeriod     time.Duration
 	HealthServerEnabled     bool
-	serviceName             string // only set if EnableHealthServer is called
 	enabledUnaryInterceptor enabledInterceptor
 }
 
@@ -46,10 +45,9 @@ func ShutdownGracePeriod(duration time.Duration) Option {
 	}
 }
 
-func EnableHealthServer(serviceName string) Option {
+func DisableHealthServer() Option {
 	return func(opts *Options) {
-		opts.HealthServerEnabled = true
-		opts.serviceName = serviceName
+		opts.HealthServerEnabled = false
 	}
 }
 

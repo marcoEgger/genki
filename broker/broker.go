@@ -21,6 +21,8 @@ type Broker interface {
 
 type Subscriber func(delivery interface{})
 
-type Publisher interface {
+type Publisher func(routingKey string, event interface{}) error
+
+type PublishProvider interface {
 	Publish(routingKey string, event interface{}) error
 }

@@ -17,9 +17,9 @@ const (
 // The serving status will be set to NOT_SERVING.
 func (srv *server) registerHealthServer() {
 	srv.healthz = health.NewServer()
-	srv.healthz.SetServingStatus(srv.opts.serviceName, HealthUnknown)
+	srv.healthz.SetServingStatus(srv.opts.Name, HealthUnknown)
 	grpc_health_v1.RegisterHealthServer(srv.grpc, srv.healthz)
-	logger.Infof("registered gRPC health server for service '%s'", srv.opts.serviceName)
+	logger.Infof("gRPC health for server '%s' enabled", srv.opts.Name)
 }
 
 // setServingStatus of the gRPC server of the health server is enabled.
@@ -29,6 +29,6 @@ func (srv *server) registerHealthServer() {
 // 2 = NOT_SERVING
 func (srv *server) setServingStatus(status int32) {
 	if srv.opts.HealthServerEnabled {
-		srv.healthz.SetServingStatus(srv.opts.serviceName, grpc_health_v1.HealthCheckResponse_ServingStatus(status))
+		srv.healthz.SetServingStatus(srv.opts.Name, grpc_health_v1.HealthCheckResponse_ServingStatus(status))
 	}
 }

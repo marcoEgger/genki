@@ -14,7 +14,14 @@ func UnaryServerLogging() grpc.UnaryServerInterceptor {
 		log := logger.WithMetadata(ctx)
 		log.Infof("incoming unary request to '%s'", info.FullMethod)
 		defer func(started time.Time) {
-			log.Infof("finished unary request to '%s' (took %v)", info.FullMethod, time.Since(started))
+			log = logger.WithFields(logger.Fields{
+				"took": time.Since(started),
+			})
+			if err != nil {
+				log.Infof("finished unary request to '%s', err=%s", info.FullMethod, err)
+				return
+			}
+			log.Infof("finished unary request to '%s'", info.FullMethod)
 		}(time.Now())
 
 		return handler(ctx, req)
@@ -26,10 +33,13 @@ func UnaryClientLogging() grpc.UnaryClientInterceptor {
 		log := logger.WithMetadata(ctx)
 		log.Infof("client call '%s' to server '%s'", method, cc.Target())
 		defer func(started time.Time) {
+			log = logger.WithFields(logger.Fields{
+				"took": time.Since(started),
+			})
 			if err != nil {
-				log.Infof("client call to '%s' (server=%s) failed (took %v): %s", method, cc.Target(), time.Since(started), err)
+				log.Infof("client call to '%s' (server=%s) failed: %s", method, cc.Target, err)
 			} else {
-				log.Infof("client request to '%s' was successfully handled by server '%s' (took %v)", method, cc.Target(), time.Since(started))
+				log.Infof("client request to '%s' was successfully handled by server '%s'", method, cc.Target())
 			}
 		}(time.Now())
 
