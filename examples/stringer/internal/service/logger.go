@@ -26,14 +26,16 @@ func (e exampleLogger) Hello(ctx context.Context, name string) (greeting *models
 	log.Infof("call to Hello started")
 	defer func(started time.Time) {
 		log = log.WithFields(logger.Fields{
-			"greeting.name": greeting.Name,
-			"greeting.template": greeting.Template,
 			"took": time.Since(started),
 		})
 		if err != nil {
 			log.Infof("call to 'Hello' finished error err=%v", err)
 			return
 		}
+		log = log.WithFields(logger.Fields{
+			"greeting.name": greeting.Name,
+			"greeting.template": greeting.Template,
+		})
 		log.Infof("call to 'Hello' finished without error")
 	}(time.Now())
 	return e.next.Hello(ctx, name)

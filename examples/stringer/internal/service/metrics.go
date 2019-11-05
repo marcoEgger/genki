@@ -3,35 +3,58 @@ package service
 import (
 	"context"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/lukasjarosch/genki/examples/stringer/internal/models"
-	"github.com/lukasjarosch/genki/logger"
 )
 
-type eventPublisher struct {
+var (
+	greetingsRendered = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace:   "example",
+		Subsystem:   "domain",
+		Name:        "greetings_rendered_count",
+		Help:        "the amount of greetings rendered",
+		ConstLabels: nil,
+	}, []string{"name"})
+	domainErrors = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace:   "example",
+		Subsystem:   "domain",
+		Name:        "business_error_count",
+		Help:        "the amount of errors returned from the business logic",
+	})
+)
+
+type exampleMetrics struct {
 	next Service
-	pub  Publisher
 }
 
-func NewEventPublisher(publisher Publisher) Middleware {
+func NewExampleMetrics() Middleware {
+	_ = prometheus.Register(greetingsRendered)
+	_ = prometheus.Register(domainErrors)
+
 	return func(next Service) Service {
-		return &eventPublisher{next: next, pub: publisher}
+		return &exampleMetrics{next: next}
 	}
 }
 
-// Hello will publish an event if the use-case executed without an error
-func (e eventPublisher) Hello(ctx context.Context, name string) (greeting *models.Greeting, err error) {
-	log := logger.WithMetadata(ctx)
+func (e exampleMetrics) Hello(ctx context.Context, name string) (greeting *models.Greeting, err error) {
 	defer func() {
-		if err == nil {
-			if err := e.pub.GreetingRendered(greeting); err != nil {
-				log.Warnf("failed to publish Greeting with routing key '%s': %s", "some.key", err)
-			}
+		if err != nil {
+		    domainErrors.Inc()
 		}
 	}()
 	return e.next.Hello(ctx, name)
 }
 
-// Render: nothing to do
-func (e eventPublisher) Render(ctx context.Context, greeting models.Greeting) (err error) {
+func (e exampleMetrics) Render(ctx context.Context, greeting models.Greeting) (err error) {
+	defer func() {
+		if err != nil {
+			domainErrors.Inc()
+			return
+		}
+		greetingsRendered.With(prometheus.Labels{
+			"name": greeting.Name,
+		}).Inc()
+	}()
 	return e.next.Render(ctx, greeting)
 }

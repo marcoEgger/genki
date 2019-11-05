@@ -8,15 +8,15 @@ import (
 	"github.com/lukasjarosch/genki/logger"
 )
 
-type exampleService struct {
+type useCase struct {
 	exampleRepo models.GreetingRepository
 }
 
-func NewServiceImplementation(repo models.GreetingRepository) Service {
-	return &exampleService{exampleRepo: repo}
+func NewUseCase(repo models.GreetingRepository) Service {
+	return &useCase{exampleRepo: repo}
 }
 
-func (svc *exampleService) Hello(ctx context.Context, name string) (greeting *models.Greeting, err error) {
+func (svc *useCase) Hello(ctx context.Context, name string) (greeting *models.Greeting, err error) {
 	log := logger.WithMetadata(ctx)
 
 	greeting, _ = svc.exampleRepo.FindGreetingByName(name)
@@ -29,7 +29,7 @@ func (svc *exampleService) Hello(ctx context.Context, name string) (greeting *mo
 	return greeting, nil
 }
 
-func (svc *exampleService) Render(ctx context.Context, greeting models.Greeting) error {
+func (svc *useCase) Render(ctx context.Context, greeting models.Greeting) error {
 	logger.Info(strings.Repeat("YO", len(greeting.Render())/2))
 	logger.Infof("%s", greeting.Render())
 	logger.Info(strings.Repeat("YO", len(greeting.Render())/2))

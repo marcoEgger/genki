@@ -36,8 +36,9 @@ func main() {
 	}
 
 	amqpBroker := amqp.NewSession(config.GetString(amqp.UrlConfigKey))
-	implementation := service.NewServiceImplementation(datastore.NewInMem())
+	implementation := service.NewUseCase(datastore.NewInMem())
 	implementation = service.NewEventPublisher(events.NewExamplePublisher(amqpBroker))(implementation)
+	implementation = service.NewExampleMetrics()(implementation)
 	implementation = service.ExampleLogger()(implementation)
 
 	if err := amqpBroker.AddPublisher("test", events.GreetingRenderedTopic); err != nil {
