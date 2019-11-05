@@ -1,10 +1,8 @@
 package main
 
 import (
-	"context"
 	"log"
 
-	"github.com/spf13/pflag"
 	amqp2 "github.com/streadway/amqp"
 
 	"github.com/lukasjarosch/genki"
@@ -12,6 +10,8 @@ import (
 	"github.com/lukasjarosch/genki/broker/amqp"
 	"github.com/lukasjarosch/genki/cli"
 	"github.com/lukasjarosch/genki/config"
+	"github.com/lukasjarosch/genki/examples/stringer/internal/greeting"
+	grpc2 "github.com/lukasjarosch/genki/examples/stringer/internal/grpc"
 	"github.com/lukasjarosch/genki/logger"
 	"github.com/lukasjarosch/genki/server/grpc"
 	"github.com/lukasjarosch/genki/server/http"
@@ -25,11 +25,7 @@ const Service = "stringer"
 // them to the configuration. After they are bound, they are globally accessible via the config package.
 func init() {
 	flags := cli.NewFlagSet(Service)
-	flags.Add(logger.Flags)
-	flags.Add(http.Flags)
-	flags.Add(grpc.Flags)
-	flags.Add(amqp.Flags)
-	flags.Add(Flags)
+	flags.Add(logger.Flags, http.Flags, grpc.Flags, amqp.Flags)
 	flags.Parse()
 	config.BindFlagSet(flags.Set())
 }
@@ -53,6 +49,10 @@ func main() {
 		logger.Warnf("failed to add subscription to routing key '%s': %s", err)
 	}
 
+	// service layer
+	implementation := greeting.NewServiceImplementation(amqpBroker)
+
+	// transport layer
 	app := genki.NewService()
 	app.RegisterBroker(amqpBroker)
 
@@ -63,9 +63,7 @@ func main() {
 		grpc.ShutdownGracePeriod(config.GetDuration(grpc.GracePeriodConfigKey)),
 		grpc.EnableHealthServer(Service),
 	)
-	example.RegisterExampleServiceServer(grpcServer.Server(), &impl{
-		publisher:amqpBroker,
-	})
+	example.RegisterExampleServiceServer(grpcServer.Server(), grpc2.NewExampleService(implementation))
 
 	// register servers
 	app.AddServer(grpcServer)
@@ -81,32 +79,4 @@ func main() {
 // impl is a quick and dirty handler implementation
 type impl struct {
 	publisher broker.Publisher
-}
-
-func (i *impl) Hello(ctx context.Context, request *example.HelloRequest) (*example.HelloResponse, error) {
-
-	if err := i.publisher.Publish("some.key", &example.Greeting{}); err != nil {
-		logger.Warnf("failed to publish to '%s': %s", "some.key", err)
-	}
-
-	return &example.HelloResponse{
-		Greeting:             &example.Greeting{
-			Template:             "Ohai there %s",
-			Name:                 "Lukas",
-			Rendered:             "Ohai there Lukas",
-		},
-	}, nil
-}
-
-// this could be somewhere in your business logic. That's an easy way to configure it.
-func Flags() *pflag.FlagSet {
-	fs := pflag.NewFlagSet("http-server", pflag.ContinueOnError)
-
-	fs.String(
-		"my-own-flag",
-		"foobar",
-		"something something description",
-	)
-
-	return fs
 }
