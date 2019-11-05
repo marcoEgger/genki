@@ -28,25 +28,24 @@ func NewServer(opts ...Option) Server {
 	srv := &server{opts: options}
 
 	var unaryInterceptors []grpc.UnaryServerInterceptor
+
 	unaryInterceptors = append(unaryInterceptors, interceptor.Metadata())
-	//if srv.opts.enabledUnaryInterceptor.requestId {
-	//	logger.Debugf("grpc interceptor enabled: RequestId")
-	//	unaryInterceptors = append(unaryInterceptors, interceptor.RequestId())
-	//}
+	logger.Debugf("gRPC interceptor enabled: Metadata")
+
 	if srv.opts.enabledUnaryInterceptor.logging {
-		logger.Debugf("grpc interceptor enabled: Logging")
+		logger.Debugf("gRPC interceptor enabled: Logging")
 		unaryInterceptors = append(unaryInterceptors, interceptor.Logging())
 	}
 	if srv.opts.enabledUnaryInterceptor.prometheus {
-		logger.Debugf("grpc interceptor enabled: Prometheus")
+		logger.Debugf("gRPC interceptor enabled: Prometheus")
 		unaryInterceptors = append(unaryInterceptors, interceptor.Prometheus())
 	}
 
 	srv.grpc = grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-		unaryInterceptors...
+		unaryInterceptors...,
 	)))
 
-	return  srv
+	return srv
 }
 
 // ListenAndServe ties everything together and runs the gRPC server in a separate goroutine.

@@ -32,11 +32,14 @@ func NewServer(opts ...Option) Server {
 func (srv *server) Handle(endpoint string, handler http.Handler) {
 	if srv.opts.LoggingMiddlewareEnabled {
 		handler = middleware.Logging(handler)
+		logger.Debugf("HTTP middleware enabled for endpoint '%s': Logging", endpoint)
 	}
 	if srv.opts.PrometheusMiddlewareEnabled {
 		handler = middleware.Prometheus(handler)
+		logger.Debugf("HTTP middleware enabled for endpoint '%s': Prometheus", endpoint)
 	}
 	handler = middleware.Metadata(handler)
+	logger.Debugf("HTTP middleware enabled for endpoint '%s': Metadata", endpoint)
 	srv.mux.Handle(endpoint, handler)
 }
 
