@@ -8,16 +8,16 @@ import (
 )
 
 const (
-	HealthUnknown = 0
-	HealthServing = 1
+	HealthUnknown    = 0
+	HealthServing    = 1
 	HealthNotServing = 2
 )
 
 // registerHealthServer will register a gRPC v1 Health server.
-// The serving status will be set to 2 (NOT_SERVING).
+// The serving status will be set to NOT_SERVING.
 func (srv *server) registerHealthServer() {
 	srv.healthz = health.NewServer()
-	srv.healthz.SetServingStatus(srv.opts.serviceName, 1)
+	srv.healthz.SetServingStatus(srv.opts.serviceName, HealthUnknown)
 	grpc_health_v1.RegisterHealthServer(srv.grpc, srv.healthz)
 	logger.Infof("registered gRPC health server for service '%s'", srv.opts.serviceName)
 }
@@ -27,7 +27,7 @@ func (srv *server) registerHealthServer() {
 // 0 = UNKNOWN
 // 1 = SERVING
 // 2 = NOT_SERVING
-func (srv *server) setServingStatus(status int32)  {
+func (srv *server) setServingStatus(status int32) {
 	if srv.opts.HealthServerEnabled {
 		srv.healthz.SetServingStatus(srv.opts.serviceName, grpc_health_v1.HealthCheckResponse_ServingStatus(status))
 	}

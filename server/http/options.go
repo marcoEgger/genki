@@ -11,12 +11,14 @@ const DefaultGracePeriod = 3 * time.Second
 const DefaultName = "default"
 const DefaultLoggingMiddlewareEnabled = true
 const DefaultPrometheusMiddlewareEnabled = true
+const DefaultHealthEndpoint = "/health"
 
 type Options struct {
-	Port                       string
-	Name                       string
-	ShutdownGracePeriod        time.Duration
-	LoggingMiddlewareEnabled   bool
+	Port                        string
+	Name                        string
+	HealthEndpoint              string
+	ShutdownGracePeriod         time.Duration
+	LoggingMiddlewareEnabled    bool
 	PrometheusMiddlewareEnabled bool
 }
 
@@ -44,13 +46,20 @@ func DisableLoggingMiddleware() Option {
 	}
 }
 
+func HealthEndpoint(endpoint string) Option {
+	return func(opts *Options) {
+		opts.HealthEndpoint = endpoint
+	}
+}
+
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Port:                       DefaultPort,
-		ShutdownGracePeriod:        DefaultGracePeriod,
-		Name:                       DefaultName,
-		LoggingMiddlewareEnabled:   DefaultLoggingMiddlewareEnabled,
-		PrometheusMiddlewareEnabled:DefaultPrometheusMiddlewareEnabled,
+		Port:                        DefaultPort,
+		ShutdownGracePeriod:         DefaultGracePeriod,
+		Name:                        DefaultName,
+		LoggingMiddlewareEnabled:    DefaultLoggingMiddlewareEnabled,
+		PrometheusMiddlewareEnabled: DefaultPrometheusMiddlewareEnabled,
+		HealthEndpoint:              DefaultHealthEndpoint,
 	}
 
 	for _, o := range opts {

@@ -15,7 +15,7 @@ func NewDebugServer() Server {
 	)
 
 	srv.Handle("/metrics", promhttp.Handler())
-	logger.Debugf("prometheus metrics are exposed via 'debug' on '/metrics'")
+	logger.Infof("prometheus metrics are exposed via 'debug' HTTP server on '/metrics'")
 
 	return srv
 }

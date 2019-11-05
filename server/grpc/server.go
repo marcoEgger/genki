@@ -29,15 +29,15 @@ func NewServer(opts ...Option) Server {
 
 	var unaryInterceptors []grpc.UnaryServerInterceptor
 
-	unaryInterceptors = append(unaryInterceptors, interceptor.Metadata())
-	logger.Debugf("gRPC interceptor enabled: Metadata")
+	unaryInterceptors = append(unaryInterceptors, interceptor.UnaryServerMetadata())
+	logger.Debugf("gRPC server '%s': metadata interceptor enabled", srv.opts.Name)
 
 	if srv.opts.enabledUnaryInterceptor.logging {
-		logger.Debugf("gRPC interceptor enabled: Logging")
-		unaryInterceptors = append(unaryInterceptors, interceptor.Logging())
+		logger.Debugf("gRPC server '%s': logging interceptor enabled", srv.opts.Name)
+		unaryInterceptors = append(unaryInterceptors, interceptor.UnaryServerLogging())
 	}
 	if srv.opts.enabledUnaryInterceptor.prometheus {
-		logger.Debugf("gRPC interceptor enabled: Prometheus")
+		logger.Debugf("gRPC server '%s': prometheus interceptor enabled", srv.opts.Name)
 		unaryInterceptors = append(unaryInterceptors, interceptor.Prometheus())
 	}
 
