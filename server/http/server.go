@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/etherlabsio/healthcheck"
+
 	"github.com/lukasjarosch/genki/logger"
 	"github.com/lukasjarosch/genki/server/http/middleware"
 )
@@ -32,14 +34,14 @@ func NewServer(opts ...Option) Server {
 func (srv *server) Handle(endpoint string, handler http.Handler) {
 	if srv.opts.LoggingMiddlewareEnabled {
 		handler = middleware.Logging(handler)
-		logger.Debugf("HTTP middleware enabled for endpoint '%s': Logging", endpoint)
+		logger.Debugf("HTTP server '%s': logging middleware enabled for endpoint '%s'", srv.opts.Name, endpoint)
 	}
 	if srv.opts.PrometheusMiddlewareEnabled {
 		handler = middleware.Prometheus(handler)
-		logger.Debugf("HTTP middleware enabled for endpoint '%s': Prometheus", endpoint)
+		logger.Debugf("HTTP server '%s': prometheus middleware enabled for endpoint '%s'", srv.opts.Name, endpoint)
 	}
 	handler = middleware.Metadata(handler)
-	logger.Debugf("HTTP middleware enabled for endpoint '%s': Metadata", endpoint)
+	logger.Debugf("HTTP server '%s': metadata middleware enabled for endpoint '%s'", srv.opts.Name, endpoint)
 	srv.mux.Handle(endpoint, handler)
 }
 
@@ -47,6 +49,10 @@ func (srv *server) Handle(endpoint string, handler http.Handler) {
 // Will block until the context is done.
 func (srv *server) ListenAndServe(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
+
+	// add health endpoint
+	srv.Handle(srv.opts.HealthEndpoint, healthcheck.Handler())
+	logger.Infof("registered /health HTTP server '%s'", srv.opts.Name)
 
 	srv.httpServer = &http.Server{
 		Addr:    fmt.Sprintf("0.0.0.0:%s", srv.opts.Port),
