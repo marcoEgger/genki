@@ -11,7 +11,7 @@ import (
 type config struct {
 }
 
-func NewViperConfig() *config {
+func newViperConfig() *config {
 	return &config{}
 }
 

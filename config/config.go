@@ -9,7 +9,11 @@ import (
 var cfg Config
 
 func init() {
-	cfg = NewViperConfig()
+	cfg = NewConfig()
+}
+
+func NewConfig() Config {
+	return newViperConfig()
 }
 
 type Config interface {
