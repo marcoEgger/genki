@@ -1,5 +1,5 @@
 package datastore
 
 const (
-	sqlCreateSomething = `CREATE`
+	sqlFindGreeting = `DERP`
 )

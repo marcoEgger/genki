@@ -8,11 +8,11 @@ import (
 
 	"github.com/lukasjarosch/genki/broker"
 	pb "github.com/lukasjarosch/genki/examples/stringer/internal/proto"
-	"github.com/lukasjarosch/genki/examples/stringer/internal/service"
+	"github.com/lukasjarosch/genki/examples/stringer/internal/stringer"
 	example "github.com/lukasjarosch/genki/examples/stringer/proto"
 )
 
-func GreetingHappenedSubscriber(service service.Service) broker.Subscriber {
+func GreetingHappenedSubscriber(service stringer.Service) broker.Subscriber {
 	return func(delivery interface{}) {
 		event := delivery.(amqp.Delivery)
 		var greeting example.Greeting

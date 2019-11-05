@@ -11,7 +11,7 @@ import (
 	events "github.com/lukasjarosch/genki/examples/stringer/internal/broker"
 	"github.com/lukasjarosch/genki/examples/stringer/internal/datastore"
 	grpc2 "github.com/lukasjarosch/genki/examples/stringer/internal/proto"
-	"github.com/lukasjarosch/genki/examples/stringer/internal/service"
+	"github.com/lukasjarosch/genki/examples/stringer/internal/stringer"
 	"github.com/lukasjarosch/genki/logger"
 	"github.com/lukasjarosch/genki/server/grpc"
 	"github.com/lukasjarosch/genki/server/http"
@@ -36,10 +36,10 @@ func main() {
 	}
 
 	amqpBroker := amqp.NewSession(config.GetString(amqp.UrlConfigKey))
-	implementation := service.NewUseCase(datastore.NewInMem())
-	implementation = service.NewEventPublisher(events.NewExamplePublisher(amqpBroker))(implementation)
-	implementation = service.NewExampleMetrics()(implementation)
-	implementation = service.ExampleLogger()(implementation)
+	implementation := stringer.NewUseCase(datastore.NewInMem())
+	implementation = stringer.NewEventPublisher(events.NewExamplePublisher(amqpBroker))(implementation)
+	implementation = stringer.NewExampleMetrics()(implementation)
+	implementation = stringer.ExampleLogger()(implementation)
 
 	if err := amqpBroker.AddPublisher("test", events.GreetingRenderedTopic); err != nil {
 		logger.Warnf("failed to add publisher to exchange '%s' with routing key '%s': %s", "test", events.GreetingRenderedTopic, err)

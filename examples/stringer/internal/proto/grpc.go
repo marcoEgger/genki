@@ -3,15 +3,15 @@ package proto
 import (
 	"context"
 
-	"github.com/lukasjarosch/genki/examples/stringer/internal/service"
+	"github.com/lukasjarosch/genki/examples/stringer/internal/stringer"
 	example "github.com/lukasjarosch/genki/examples/stringer/proto"
 )
 
 type ExampleService struct {
-	greeting service.Service
+	greeting stringer.Service
 }
 
-func NewExampleService(greetingService service.Service) *ExampleService {
+func NewExampleService(greetingService stringer.Service) *ExampleService {
 	return &ExampleService{
 		greeting: greetingService,
 	}
