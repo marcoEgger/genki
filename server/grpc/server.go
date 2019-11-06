@@ -38,7 +38,7 @@ func NewServer(opts ...Option) Server {
 	}
 	if srv.opts.enabledUnaryInterceptor.prometheus {
 		logger.Debugf("gRPC server '%s': prometheus interceptor enabled", srv.opts.Name)
-		unaryInterceptors = append(unaryInterceptors, interceptor.Prometheus())
+		unaryInterceptors = append(unaryInterceptors, interceptor.UnaryServerPrometheus())
 	}
 
 	srv.grpc = grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
