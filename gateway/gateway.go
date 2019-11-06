@@ -14,16 +14,15 @@ type gateway struct {
 	ctx         context.Context
 	mux         *runtime.ServeMux
 	dialOptions []grpc.DialOption
-	endpoint    string
 }
 
 type Gateway interface {
 	HttpMux() *runtime.ServeMux
-	Endpoint() string
 	GrpcDialOpts() []grpc.DialOption
+	Context() context.Context
 }
 
-func NewGateway(ctx context.Context, endpoint string) Gateway {
+func NewGateway(ctx context.Context) Gateway {
 	mux := runtime.NewServeMux(
 		runtime.WithIncomingHeaderMatcher(IncomingHeaderMatcher),
 	)
@@ -31,6 +30,7 @@ func NewGateway(ctx context.Context, endpoint string) Gateway {
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(grpcmiddleware.ChainUnaryClient(
 			interceptor.UnaryClientMetadata(),
+			interceptor.UnaryClientPrometheus(),
 			interceptor.UnaryClientLogging(),
 		)),
 	}
@@ -39,7 +39,6 @@ func NewGateway(ctx context.Context, endpoint string) Gateway {
 		ctx:         ctx,
 		mux:         mux,
 		dialOptions: opts,
-		endpoint:    endpoint,
 	}
 
 	return gw
@@ -53,6 +52,7 @@ func (gw *gateway) GrpcDialOpts() []grpc.DialOption {
 	return gw.dialOptions
 }
 
-func (gw *gateway) Endpoint() string {
-	return gw.endpoint
+func (gw *gateway) Context() context.Context {
+	return gw.ctx
 }
+
