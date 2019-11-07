@@ -37,7 +37,7 @@ func UnaryClientLogging() grpc.UnaryClientInterceptor {
 				"took": time.Since(started),
 			})
 			if err != nil {
-				log.Infof("client call to '%s' (server=%s) failed: %s", method, cc.Target, err)
+				log.Infof("client call to '%s' (server=%s) failed: %s", method, cc.Target(), err)
 			} else {
 				log.Infof("client request to '%s' was successfully handled by server '%s'", method, cc.Target())
 			}
