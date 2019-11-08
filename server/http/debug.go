@@ -12,7 +12,7 @@ func NewDebugServer() Server {
 	srv := NewServer(
 		Name("debug"),
 		Port("3000"),
-		DisableLoggingMiddleware(),
+		LoggingSkipEndpoints("/metrics"),
 	)
 
 	srv.Handle("/metrics", promhttp.Handler())

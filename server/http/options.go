@@ -20,6 +20,7 @@ type Options struct {
 	ShutdownGracePeriod         time.Duration
 	LoggingMiddlewareEnabled    bool
 	PrometheusMiddlewareEnabled bool
+	LoggingSkipEndpoints        []string
 }
 
 func Port(addr string) Option {
@@ -46,6 +47,12 @@ func DisableLoggingMiddleware() Option {
 	}
 }
 
+func LoggingSkipEndpoints(skip ...string) Option {
+	return func(opts *Options) {
+		opts.LoggingSkipEndpoints = skip
+	}
+}
+
 func HealthEndpoint(endpoint string) Option {
 	return func(opts *Options) {
 		opts.HealthEndpoint = endpoint
@@ -60,6 +67,7 @@ func newOptions(opts ...Option) Options {
 		LoggingMiddlewareEnabled:    DefaultLoggingMiddlewareEnabled,
 		PrometheusMiddlewareEnabled: DefaultPrometheusMiddlewareEnabled,
 		HealthEndpoint:              DefaultHealthEndpoint,
+		LoggingSkipEndpoints:        []string{},
 	}
 
 	for _, o := range opts {

@@ -33,7 +33,7 @@ func NewServer(opts ...Option) Server {
 // The 'Metadata' middleware is always the first middleware. It cannot be disabled.
 func (srv *server) Handle(endpoint string, handler http.Handler) {
 	if srv.opts.LoggingMiddlewareEnabled {
-		handler = middleware.Logging(handler)
+		handler = middleware.Logging(handler, srv.opts.LoggingSkipEndpoints...)
 		logger.Debugf("HTTP server '%s': logging middleware enabled for endpoint '%s'", srv.opts.Name, endpoint)
 	}
 	if srv.opts.PrometheusMiddlewareEnabled {
