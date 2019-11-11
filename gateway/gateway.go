@@ -25,6 +25,7 @@ type Gateway interface {
 func NewGateway(ctx context.Context) Gateway {
 	mux := runtime.NewServeMux(
 		runtime.WithIncomingHeaderMatcher(IncomingHeaderMatcher),
+		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}),
 	)
 	opts := []grpc.DialOption{
 		grpc.WithInsecure(),
@@ -55,4 +56,3 @@ func (gw *gateway) GrpcDialOpts() []grpc.DialOption {
 func (gw *gateway) Context() context.Context {
 	return gw.ctx
 }
-
