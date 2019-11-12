@@ -1,19 +1,20 @@
-package stringer
+package middleware
 
 import (
 	"context"
 	"time"
 
 	"github.com/lukasjarosch/genki/examples/stringer/internal/models"
+	"github.com/lukasjarosch/genki/examples/stringer/internal/stringer"
 	"github.com/lukasjarosch/genki/logger"
 )
 
 type exampleLogger struct {
-	next Service
+	next stringer.Service
 }
 
-func ExampleLogger() Middleware {
-	return func(next Service) Service {
+func ExampleLogger() stringer.Middleware {
+	return func(next stringer.Service) stringer.Service {
 		return &exampleLogger{next: next}
 	}
 }

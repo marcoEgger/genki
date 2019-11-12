@@ -12,6 +12,8 @@ func ErrorToProto(err error) error {
 	switch err {
 	case models.ErrGreetingEmptyName:
 		return status.Error(codes.InvalidArgument, err.Error())
+	case models.Unauthorized:
+		return status.Errorf(codes.PermissionDenied, err.Error())
 	default:
 		return status.Error(codes.Unknown, err.Error())
 	}

@@ -1,4 +1,4 @@
-package stringer
+package middleware
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/lukasjarosch/genki/examples/stringer/internal/models"
+	"github.com/lukasjarosch/genki/examples/stringer/internal/stringer"
 )
 
 var (
@@ -25,14 +26,14 @@ var (
 )
 
 type exampleMetrics struct {
-	next Service
+	next stringer.Service
 }
 
-func NewExampleMetrics() Middleware {
+func NewExampleMetrics() stringer.Middleware {
 	_ = prometheus.Register(greetingsRendered)
 	_ = prometheus.Register(domainErrors)
 
-	return func(next Service) Service {
+	return func(next stringer.Service) stringer.Service {
 		return &exampleMetrics{next: next}
 	}
 }

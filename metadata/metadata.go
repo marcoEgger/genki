@@ -24,3 +24,14 @@ func NewContext(ctx context.Context, md Metadata) context.Context {
 func NewRequestID() string {
 	return uuid.New().String()
 }
+
+func GetFromContext(ctx context.Context, key string) string {
+	md, ok := FromContext(ctx)
+	if !ok {
+		return ""
+	}
+	if val, ok := md[key]; ok {
+		return val
+	}
+	return ""
+}

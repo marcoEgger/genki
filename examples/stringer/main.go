@@ -7,11 +7,13 @@ import (
 	"github.com/lukasjarosch/genki/broker"
 	"github.com/lukasjarosch/genki/broker/amqp"
 	"github.com/lukasjarosch/genki/cli"
+	"github.com/lukasjarosch/genki/client/http/authz"
 	"github.com/lukasjarosch/genki/config"
 	events "github.com/lukasjarosch/genki/examples/stringer/internal/broker"
 	"github.com/lukasjarosch/genki/examples/stringer/internal/datastore"
 	grpc2 "github.com/lukasjarosch/genki/examples/stringer/internal/proto"
 	"github.com/lukasjarosch/genki/examples/stringer/internal/stringer"
+	"github.com/lukasjarosch/genki/examples/stringer/internal/stringer/middleware"
 	"github.com/lukasjarosch/genki/logger"
 	"github.com/lukasjarosch/genki/server/grpc"
 	"github.com/lukasjarosch/genki/server/http"
@@ -25,7 +27,7 @@ const Service = "stringer"
 // them to the configuration. After they are bound, they are globally accessible via the config package.
 func init() {
 	flags := cli.NewFlagSet(Service)
-	flags.Add(logger.Flags, http.Flags, grpc.Flags, amqp.Flags)
+	flags.Add(logger.Flags, http.Flags, grpc.Flags, amqp.Flags, authz.Flags)
 	flags.Parse()
 	config.BindFlagSet(flags.Set())
 }
@@ -37,9 +39,10 @@ func main() {
 
 	amqpBroker := amqp.NewSession(config.GetString(amqp.UrlConfigKey))
 	implementation := stringer.NewUseCase(datastore.NewInMem())
-	implementation = stringer.NewEventPublisher(events.NewExamplePublisher(amqpBroker))(implementation)
-	implementation = stringer.NewExampleMetrics()(implementation)
-	implementation = stringer.ExampleLogger()(implementation)
+	implementation = middleware.NewEventPublisher(events.NewExamplePublisher(amqpBroker))(implementation)
+	implementation = middleware.NewExampleMetrics()(implementation)
+	implementation = middleware.NewAuthorizer(authz.NewOpenPolicyAgentClient(config.GetString(authz.OpenPolicyAgentUrlConfigKey)))(implementation)
+	implementation = middleware.ExampleLogger()(implementation)
 
 	if err := amqpBroker.AddPublisher("test", events.GreetingRenderedTopic); err != nil {
 		logger.Warnf("failed to add publisher to exchange '%s' with routing key '%s': %s", "test", events.GreetingRenderedTopic, err)

@@ -20,14 +20,12 @@ func newZapLogger(level string, callerskip int) (Logger, error) {
 		TimeKey:        "timestamp",
 		LevelKey:       "severity",
 		NameKey:        "logger",
-		CallerKey:      "caller",
 		MessageKey:     "message",
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
 		EncodeLevel:    zapcore.LowercaseLevelEncoder,
 		EncodeTime:     zapcore.ISO8601TimeEncoder,
 		EncodeDuration: zapcore.StringDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
 	zapConfig := zap.Config{
@@ -108,22 +106,10 @@ func (l *zapLogger) WithFields(keyValues Fields) Logger {
 }
 
 func (l *zapLogger) WithMetadata(ctx context.Context) Logger {
-	md, ok := metadata.FromContext(ctx)
-	if !ok {
-		return log
-	}
-
 	fields := make(Fields)
-
-	if reqID, ok := md[metadata.RequestIDKey]; ok {
-		fields[metadata.RequestIDKey] = reqID
-	}
-	if accID, ok := md[metadata.AccountIDKey]; ok {
-		fields[metadata.AccountIDKey] = accID
-	}
-	if userID, ok := md[metadata.UserIDKey]; ok {
-		fields[metadata.UserIDKey] = userID
-	}
+	fields[metadata.RequestIDKey] = metadata.GetFromContext(ctx, metadata.RequestIDKey)
+	fields[metadata.AccountIDKey] = metadata.GetFromContext(ctx, metadata.AccountIDKey)
+	fields[metadata.UserIDKey] = metadata.GetFromContext(ctx, metadata.UserIDKey)
 
 	return log.WithFields(fields)
 }

@@ -1,19 +1,20 @@
-package stringer
+package middleware
 
 import (
 	"context"
 
 	"github.com/lukasjarosch/genki/examples/stringer/internal/models"
+	"github.com/lukasjarosch/genki/examples/stringer/internal/stringer"
 	"github.com/lukasjarosch/genki/logger"
 )
 
 type eventPublisher struct {
-	next Service
-	pub  Publisher
+	next stringer.Service
+	pub  stringer.Publisher
 }
 
-func NewEventPublisher(publisher Publisher) Middleware {
-	return func(next Service) Service {
+func NewEventPublisher(publisher stringer.Publisher) stringer.Middleware {
+	return func(next stringer.Service) stringer.Service {
 		return &eventPublisher{next: next, pub: publisher}
 	}
 }

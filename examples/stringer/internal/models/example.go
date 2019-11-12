@@ -8,6 +8,7 @@ import (
 var (
 	ErrGreetingEmptyName = errors.New("greeting.name cannot be empty")
 	ErrGetHelloTemplate  = errors.New("cannot get hello template for name")
+	Unauthorized         = errors.New("not authorized to perform action on resource")
 )
 
 type Greeting struct {
