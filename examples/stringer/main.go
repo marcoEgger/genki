@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/lukasjarosch/genki"
 	"github.com/lukasjarosch/genki/broker"
 	"github.com/lukasjarosch/genki/broker/amqp"
@@ -34,7 +32,7 @@ func init() {
 
 func main() {
 	if err := logger.NewLogger(config.GetString(logger.LogLevelConfigKey)); err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(err.Error())
 	}
 
 	amqpBroker := amqp.NewSession(config.GetString(amqp.UrlConfigKey))
