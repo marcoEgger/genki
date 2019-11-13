@@ -12,7 +12,7 @@ const (
 	RequestIdHeaderKey = "requestId"
 )
 
-func FromDelivery(delivery amqp.Delivery) context.Context {
+func MetadataFromDelivery(delivery amqp.Delivery) context.Context {
 	header := delivery.Headers
 
 	md := make(metadata.Metadata)
