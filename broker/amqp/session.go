@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/streadway/amqp"
 
 	"github.com/lukasjarosch/genki/broker"
@@ -212,6 +213,11 @@ func (s *Session) Consume(wg *sync.WaitGroup) {
 
 		for delivery := range deliveries {
 			routingKey := delivery.RoutingKey
+
+			InboundGauge.With(prometheus.Labels{
+				"routing_key": routingKey,
+			}).Inc()
+
 			logger.Infof("incoming amqp delivery with routing key %s", routingKey)
 			if handler, ok := s.subscribers[routingKey]; ok {
 				handler(delivery)
