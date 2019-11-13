@@ -1,6 +1,9 @@
 package broker
 
-import "sync"
+import (
+	"context"
+	"sync"
+)
 
 type SubscriptionCreator interface {
 	AddSubscription(exchangeName, queueName, routingKey string, handler Subscriber) error
@@ -11,9 +14,9 @@ type PublishCreator interface {
 }
 
 type Broker interface {
+	PublishProvider
 	SubscriptionCreator
 	PublishCreator
-	Publish(routingKey string, event interface{}) error
 	Declare() error
 	Consume(wg *sync.WaitGroup)
 	Shutdown()
@@ -21,8 +24,8 @@ type Broker interface {
 
 type Subscriber func(delivery interface{})
 
-type Publisher func(routingKey string, event interface{}) error
+type Publisher func(ctx context.Context,  string, event interface{}) error
 
 type PublishProvider interface {
-	Publish(routingKey string, event interface{}) error
+	Publish(ctx context.Context, routingKey string, event interface{}) error
 }

@@ -11,6 +11,7 @@ import (
 
 	"github.com/lukasjarosch/genki/broker"
 	"github.com/lukasjarosch/genki/logger"
+	"github.com/lukasjarosch/genki/metadata"
 )
 
 
@@ -77,7 +78,7 @@ func (s *Session) AddPublisher(exchangeName, routingKey string) error {
 
 // Publish will take the event, marshall it into a proto.Message and then send it on it's journey
 // to the spe
-func (s *Session) Publish(routingKey string, event interface{}) error {
+func (s *Session) Publish(ctx context.Context, routingKey string, event interface{}) error {
 	exchange, ok := s.publishers[routingKey]
 	if !ok {
 		return fmt.Errorf("no publisher with routingKey %s registered, cannot resolve exchange", routingKey)
@@ -89,7 +90,9 @@ func (s *Session) Publish(routingKey string, event interface{}) error {
 		return err
 	}
 	publishing := amqp.Publishing{
-		Headers:      amqp.Table{},
+		Headers:      amqp.Table{
+			RequestIdHeaderKey: metadata.GetFromContext(ctx, metadata.RequestIDKey),
+		},
 		ContentType:  "application/octet-stream",
 		DeliveryMode: amqp.Transient,
 		Priority:     0,
