@@ -41,7 +41,7 @@ func Nack(delivery amqp.Delivery, multiple, requeue bool) error {
 	NackCounter.With(prometheus.Labels{
 		"routing_key": delivery.RoutingKey,
 		"requeue": req,
-	})
+	}).Inc()
 	return delivery.Nack(multiple, requeue)
 }
 
