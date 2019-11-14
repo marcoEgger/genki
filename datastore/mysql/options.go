@@ -3,7 +3,11 @@ package mysql
 
 import (
 	"time"
+
+	"github.com/spf13/pflag"
 )
+
+const AddressConfigKey = "mysql-addres"
 
 type Options struct {
 	MigrationPath         string
@@ -36,6 +40,12 @@ func MaxConnectionLifetime(maxLifetime time.Duration) Option {
 	return func(options *Options) {
 		options.MaxConnectionLifetime = maxLifetime
 	}
+}
+
+func Flags() *pflag.FlagSet {
+	fs := pflag.NewFlagSet("mysql", pflag.ContinueOnError)
+	fs.String(AddressConfigKey, "root:root@tcp(localhost:3306)/database?parseTime=true", "mysql connection string")
+	return fs
 }
 
 func newOptions(opts ...Option) *Options {
