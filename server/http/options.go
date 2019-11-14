@@ -49,7 +49,7 @@ func DisableLoggingMiddleware() Option {
 
 func LoggingSkipEndpoints(skip ...string) Option {
 	return func(opts *Options) {
-		opts.LoggingSkipEndpoints = skip
+		opts.LoggingSkipEndpoints = append(opts.LoggingSkipEndpoints, skip...)
 	}
 }
 
