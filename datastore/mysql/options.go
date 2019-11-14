@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-const AddressConfigKey = "mysql-addres"
+const AddressConfigKey = "mysql-address"
 
 type Options struct {
 	MigrationPath         string
