@@ -13,6 +13,7 @@ func NewDebugServer() Server {
 		Name("debug"),
 		Port("3000"),
 		LoggingSkipEndpoints("/metrics"),
+		LoggingSkipEndpoints("/health"),
 	)
 
 	srv.Handle("/metrics", promhttp.Handler())
