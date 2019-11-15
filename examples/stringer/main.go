@@ -37,7 +37,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	amqpBroker := amqp.NewSession(config.GetString(amqp.UrlConfigKey))
+	amqpBroker := amqp.NewSession(config.GetString(amqp.AddressConfigKey))
 	implementation := stringer.NewUseCase(datastore.NewInMem())
 	implementation = middleware.NewEventPublisher(events.NewExamplePublisher(amqpBroker))(implementation)
 	implementation = middleware.NewExampleMetrics()(implementation)

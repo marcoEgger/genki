@@ -58,8 +58,8 @@ func (svc *application) Run() error {
 	}
 
 	if svc.broker != nil {
-		if err := svc.broker.Declare(); err != nil {
-			return fmt.Errorf("failed to declare broker settings: %s", err)
+		if err := svc.broker.Initialize(); err != nil {
+			return fmt.Errorf("failed to initialize broker: %s", err)
 		}
 		svc.wg.Add(1)
 		go svc.broker.Consume(&svc.wg)
@@ -75,7 +75,7 @@ func (svc *application) Run() error {
 	<-svc.stopChan
 	logger.Info("received OS signal: application is shutting down")
 	if svc.broker != nil {
-		svc.broker.Shutdown()
+		svc.broker.Disconnect()
 	}
 	svc.cancel()
 	svc.wg.Wait()

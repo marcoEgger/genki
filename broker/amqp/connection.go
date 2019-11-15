@@ -37,7 +37,7 @@ func NewConnection(addr string) *Connection {
 	return c
 }
 
-// Connect will dial to the specified AMQP server addr.
+// Consume will dial to the specified AMQP server addr.
 func (c *Connection) Connect() (err error) {
 	c.conn, err = c.dial()
 	if err != nil {
@@ -47,6 +47,20 @@ func (c *Connection) Connect() (err error) {
 	go c.monitorConnection()
 
 	return nil
+}
+
+func (c *Connection) WaitForConnection() {
+	t := time.Tick(200 * time.Millisecond)
+	for {
+		select {
+		case <-t:
+			if c.IsConnected() {
+				return
+			}
+		case <-c.ctx.Done():
+			return
+		}
+	}
 }
 
 // Shutdown the reconnector and terminate any existing connections

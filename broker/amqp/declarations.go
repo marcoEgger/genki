@@ -110,3 +110,15 @@ func DeclareBinding(b *Binding) Declaration {
 		)
 	}
 }
+
+type Delivery struct {
+	amqp.Delivery
+}
+
+func (d *Delivery) Ack(multiple bool) {
+	_ = d.Delivery.Ack(multiple)
+}
+
+func (d *Delivery) Nack(multiple, requeue bool) {
+	_ = d.Delivery.Nack(multiple, requeue)
+}
