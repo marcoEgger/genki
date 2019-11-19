@@ -12,7 +12,7 @@ func DecodeNullableFloat64(nullFloat64 sql.NullFloat64) float64 {
 	return 0
 }
 
-func DeccodeNullableInt64(nullInt64 sql.NullInt64) int64 {
+func DecodeNullableInt64(nullInt64 sql.NullInt64) int64 {
 	if nullInt64.Valid {
 		return nullInt64.Int64
 	}
