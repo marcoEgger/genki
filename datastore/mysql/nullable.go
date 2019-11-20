@@ -102,11 +102,11 @@ func EncodeNullTime(timestamp int64) sql.NullTime {
 }
 
 // EncodeUnsignedNullTime encodes a unix (second) based int64 timestamp into a sql.NullTime
-// If the value passed is '>= 0', it's considered valid
+// If the value passed is '> 0' (caution: 0 is not a valid value), it's considered valid
 // If the value passed is '< 0', it's considered invalid (NULL)
 func EncodeUnsignedNullTime(timestamp int64) sql.NullTime {
 	var nullable sql.NullTime
-	if timestamp >= 0 {
+	if timestamp > 0 {
 		nullable.Time = time.Unix(timestamp, 0)
 		nullable.Valid = true
 	} else {
