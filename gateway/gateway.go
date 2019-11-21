@@ -24,15 +24,16 @@ type Gateway interface {
 
 func NewGateway(ctx context.Context) Gateway {
 	mux := runtime.NewServeMux(
+		runtime.WithForwardResponseOption(Base64HeaderFilter),
 		runtime.WithIncomingHeaderMatcher(IncomingHeaderMatcher),
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}),
 	)
 	opts := []grpc.DialOption{
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(grpcmiddleware.ChainUnaryClient(
-			interceptor.UnaryClientMetadata(),
-			interceptor.UnaryClientPrometheus(),
 			interceptor.UnaryClientLogging(),
+			interceptor.UnaryClientPrometheus(),
+			interceptor.UnaryClientMetadata(),
 		)),
 	}
 

@@ -1,7 +1,13 @@
 package metadata
+
 const (
-	RequestIDKey string = "requestId"
-	AccountIDKey string = "accountId"
-	UserIDKey    string = "userId"
-	TraceIDKey   string = "zipkinTraceId"
+	RequestIDKey = "requestId"
+	AccountIDKey = "accountId"
+	UserIDKey    = "userId"
+	EmailKey     = "email"
+	FirstNameKey = "firstName"
+	LastNameKey  = "lastName"
+	TypeKey      = "type"
+	SubTypeKey   = "subType"
+	RolesKey     = "roles"
 )
