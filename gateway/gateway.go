@@ -24,7 +24,6 @@ type Gateway interface {
 
 func NewGateway(ctx context.Context) Gateway {
 	mux := runtime.NewServeMux(
-		runtime.WithForwardResponseOption(Base64HeaderFilter),
 		runtime.WithIncomingHeaderMatcher(IncomingHeaderMatcher),
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}),
 	)
