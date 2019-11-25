@@ -14,6 +14,7 @@ type gateway struct {
 	ctx         context.Context
 	mux         *runtime.ServeMux
 	dialOptions []grpc.DialOption
+	opts        *Options
 }
 
 type Gateway interface {
@@ -22,12 +23,22 @@ type Gateway interface {
 	Context() context.Context
 }
 
-func NewGateway(ctx context.Context) Gateway {
-	mux := runtime.NewServeMux(
+func NewGateway(ctx context.Context, options ...Option) Gateway {
+	opts := newOptions(options...)
+
+	// configure gateway runtime options
+	serveMuxOpts := []runtime.ServeMuxOption{
 		runtime.WithIncomingHeaderMatcher(IncomingHeaderMatcher),
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}),
-	)
-	opts := []grpc.DialOption{
+	}
+
+	// allow external response middleware
+	if opts.ResponseInterceptor != nil {
+		serveMuxOpts = append(serveMuxOpts, runtime.WithForwardResponseOption(opts.ResponseInterceptor))
+	}
+
+	mux := runtime.NewServeMux(serveMuxOpts...)
+	dialOpts := []grpc.DialOption{
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(grpcmiddleware.ChainUnaryClient(
 			interceptor.UnaryClientLogging(),
@@ -39,7 +50,8 @@ func NewGateway(ctx context.Context) Gateway {
 	gw := &gateway{
 		ctx:         ctx,
 		mux:         mux,
-		dialOptions: opts,
+		dialOptions: dialOpts,
+		opts:        opts,
 	}
 
 	return gw
