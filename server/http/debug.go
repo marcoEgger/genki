@@ -8,10 +8,10 @@ import (
 
 // NewDebugServer is a convenience wrapper to quickly create a HTTP server, serving on port 3000.
 // The server has the prometheus HTTP handler attached to '/metrics'.
-func NewDebugServer() Server {
+func NewDebugServer(port string) Server {
 	srv := NewServer(
 		Name("debug"),
-		Port("3000"),
+		Port(port),
 		LoggingSkipEndpoints("/metrics"),
 		LoggingSkipEndpoints("/health"),
 	)

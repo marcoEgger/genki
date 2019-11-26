@@ -1,11 +1,18 @@
 package genki
 
-const DefaultName = "genki"
-const DefaultDebugHttpServerEnabled = true
+import "github.com/spf13/pflag"
+
+const (
+	DefaultName = "genki"
+	HttpDebugPortConfigKey = "http-debug-port"
+	HttpDebugDisableConfigKey = "http-debug-disable"
+)
+
 
 type Options struct {
-	Name string
-	DebugHtpServerEnabled bool
+	Name                   string
+	HttpDebugServerEnabled bool
+	HttpDebugServerPort    string
 }
 
 func Name(name string) Option {
@@ -16,14 +23,21 @@ func Name(name string) Option {
 
 func DisableDebugHttpServer() Option {
 	return func(opts *Options) {
-		opts.DebugHtpServerEnabled = false
+		opts.HttpDebugServerEnabled = false
+	}
+}
+
+func HttpDebugServerPort(port string) Option {
+	return func(opts *Options) {
+		opts.HttpDebugServerPort = port
 	}
 }
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Name:   DefaultName,
-		DebugHtpServerEnabled: DefaultDebugHttpServerEnabled,
+		Name:                   DefaultName,
+		HttpDebugServerEnabled: true,
+		HttpDebugServerPort:    "3000",
 	}
 
 	for _, o := range opts {
@@ -31,4 +45,11 @@ func newOptions(opts ...Option) Options {
 	}
 
 	return opt
+}
+
+func Flags() *pflag.FlagSet {
+	fs := pflag.NewFlagSet("genki", pflag.ContinueOnError)
+	fs.String(HttpDebugPortConfigKey, "3000", "the port on which the debug http server is listening")
+	fs.Bool(HttpDebugDisableConfigKey, false, "disable the http-debug server")
+	return fs
 }

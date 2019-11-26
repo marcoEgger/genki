@@ -53,8 +53,10 @@ func (svc *application) Run() error {
 	defer svc.cancel()
 
 	// add the debug HTTP server if enabled
-	if svc.opts.DebugHtpServerEnabled {
-		svc.AddServer(http.NewDebugServer())
+	if svc.opts.HttpDebugServerEnabled {
+		svc.AddServer(http.NewDebugServer(
+			svc.opts.HttpDebugServerPort,
+		))
 	}
 
 	if svc.broker != nil {
