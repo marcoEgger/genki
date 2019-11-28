@@ -18,6 +18,7 @@ func NewSignalHandler() (stopCh <-chan struct{}) {
 	stop := make(chan struct{})
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, shutdownSignals...)
+
 	go func() {
 		<-c
 		close(stop)
