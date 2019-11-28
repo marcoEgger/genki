@@ -22,7 +22,11 @@ func NewFloat64(i float64) Float64 {
 }
 
 func (i *Float64) Value() float64 {
-	return i.NullFloat64.Float64
+	if i.Valid {
+		return i.NullFloat64.Float64
+	} else {
+		return -1
+	}
 }
 
 func (i *Float64) Scan(value interface{}) error {

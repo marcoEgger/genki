@@ -19,8 +19,13 @@ func NewInt64(i int64) Int64 {
 	}}
 }
 
+// Value returns the nullable's value.
+// An invalid value - representing NULL - is always -1
 func (i *Int64) Value() int64 {
-	return i.Int64
+	if i.Valid {
+		return i.Int64
+	}
+	return -1
 }
 
 type Int32 struct {
@@ -40,6 +45,11 @@ func NewInt32(i int32) Int32 {
 	}}
 }
 
+// Value returns the nullable's value.
+// An invalid value - representing NULL - is always -1
 func (i *Int32) Value() int32 {
-	return i.Int32
+	if i.Valid {
+		return i.Int32
+	}
+	return -1
 }
