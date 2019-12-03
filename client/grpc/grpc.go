@@ -28,7 +28,7 @@ func (c *Client) Connect() (err error) {
 		return errors.New("missing client name")
 	}
 
-	c.conn, err = grpc.Dial(config.GetString(fmt.Sprintf("%s-grpc-client-address", c.name)))
+	c.conn, err = grpc.Dial(config.GetString(fmt.Sprintf("%s-grpc-client-address", c.name)), grpc.WithInsecure())
 	if err != nil {
 	    return errors.Wrap(err, fmt.Sprintf("grpc client connection '%s' failed", c.name))
 	}
