@@ -26,7 +26,7 @@ func init() {
 	_ = prometheus.Register(requestsCurrent)
 }
 
-func Prometheus(handler http.Handler) http.Handler {
+func Prometheus(handler http.Handler, endpoint string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL
 		method := r.Method
@@ -43,13 +43,13 @@ func Prometheus(handler http.Handler) http.Handler {
 
 			requestDuration.With(prometheus.Labels{
 				"method": method,
-				"path": path.String(),
+				"path": endpoint,
 				"status_code": status,
 			}).Observe(float64(duration.Milliseconds()))
 
 			requestsCurrent.With(prometheus.Labels{
 				"method": method,
-				"path": path.String(),
+				"path": endpoint,
 			}).Dec()
 		}(time.Now())
 

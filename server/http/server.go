@@ -27,7 +27,7 @@ func NewServer(opts ...Option) Server {
 	}
 }
 
-// Handle registers the given endpoint pattern and handler to the server's http muliplexer.
+// Handle registers the given endpoint pattern and handler to the server's http multiplexer.
 // If the server has middleware enabled, then the enabled middleware is also added.
 // The call order is the inverse registration call order.
 // The 'Metadata' middleware is always the first middleware. It cannot be disabled.
@@ -37,7 +37,7 @@ func (srv *server) Handle(endpoint string, handler http.Handler) {
 		logger.Debugf("HTTP server '%s': logging middleware enabled for endpoint '%s'", srv.opts.Name, endpoint)
 	}
 	if srv.opts.PrometheusMiddlewareEnabled {
-		handler = middleware.Prometheus(handler)
+		handler = middleware.Prometheus(handler, endpoint)
 		logger.Debugf("HTTP server '%s': prometheus middleware enabled for endpoint '%s'", srv.opts.Name, endpoint)
 	}
 	handler = middleware.Metadata(handler)
