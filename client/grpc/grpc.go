@@ -36,6 +36,10 @@ func (c *Client) Connect() (err error) {
 	return nil
 }
 
+func (c *Client) Connection() *grpc.ClientConn {
+	return c.conn
+}
+
 func (c *Client) Disconnect() {
 	if err := c.conn.Close(); err != nil {
 		logger.Warnf("unable to close %s-client connection: %s", c.name, err)
