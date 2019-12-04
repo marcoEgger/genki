@@ -9,6 +9,7 @@ import (
 
 	"github.com/lukasjarosch/genki/config"
 	"github.com/lukasjarosch/genki/logger"
+	"github.com/lukasjarosch/genki/server/grpc/interceptor"
 )
 
 type Client struct {
@@ -28,7 +29,14 @@ func (c *Client) Connect() (err error) {
 		return errors.New("missing client name")
 	}
 
-	c.conn, err = grpc.Dial(config.GetString(fmt.Sprintf("%s-grpc-client-address", c.name)), grpc.WithInsecure())
+	c.conn, err = grpc.Dial(
+		config.GetString(fmt.Sprintf("%s-grpc-client-address", c.name)),
+		grpc.WithInsecure(),
+		grpc.WithChainUnaryInterceptor(
+			interceptor.UnaryClientMetadata(),
+			interceptor.UnaryClientLogging(),
+		),
+	)
 	if err != nil {
 	    return errors.Wrap(err, fmt.Sprintf("grpc client connection '%s' failed", c.name))
 	}
