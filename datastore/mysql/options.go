@@ -51,9 +51,9 @@ func Flags() *pflag.FlagSet {
 func newOptions(opts ...Option) *Options {
 	opt := &Options{
 		MigrationPath:         "migrations",
-		MaxOpenConnections:    10,
-		MaxIdleConnections:    0,
-		MaxConnectionLifetime: 600 * time.Second,
+		MaxOpenConnections:    25,
+		MaxIdleConnections:    25,
+		MaxConnectionLifetime: 5 * time.Minute,
 	}
 	for _, o := range opts {
 		o(opt)
