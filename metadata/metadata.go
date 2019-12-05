@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"google.golang.org/grpc/metadata"
 )
 
 // Metadata is the internal metadata abstraction. It is used to provide a single way of handling metadata
@@ -19,6 +20,19 @@ func FromContext(ctx context.Context) (Metadata, bool) {
 
 func NewContext(ctx context.Context, md Metadata) context.Context {
 	return context.WithValue(ctx, key{}, md)
+}
+
+func NewOutgoingContext(ctx context.Context) context.Context {
+	 md := metadata.Pairs("accountId", "12", "userId", "7")
+
+	 ctxMeta, ok := FromContext(ctx)
+	 if ok {
+		 for key, value := range ctxMeta {
+			md.Set(key, value)
+		 }
+	 }
+	 outCtx := metadata.NewOutgoingContext(ctx, md)
+	 return outCtx
 }
 
 func NewRequestID() string {
