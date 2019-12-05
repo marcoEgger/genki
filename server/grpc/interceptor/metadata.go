@@ -51,6 +51,7 @@ func UnaryClientMetadata() grpc.UnaryClientInterceptor {
 		findSubType(ctx, &meta)
 		findRoles(ctx, &meta)
 		ctx = md.NewContext(ctx, meta)
+		ctx = md.NewOutgoingContext(ctx)
 
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
