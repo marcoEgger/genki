@@ -17,7 +17,7 @@ import (
 
 const (
 	OpenPolicyAgentUrlConfigKey = "opa-url"
-	OpenPolicyAgentDefaultUrl = "localhost:8181"
+	OpenPolicyAgentDefaultUrl = "http://localhost:8181/v1/data/authz/"
 )
 
 type opa struct {
@@ -28,7 +28,7 @@ func NewOpenPolicyAgentClient(opaUrl string) *opa {
 	return &opa{url:opaUrl}
 }
 
-func (auth *opa) Authorize(ctx context.Context, resourceId, action string, externalData interface{}) error {
+func (auth *opa) Authorize(ctx context.Context, resourceId, action interface{}, externalData interface{}) error {
 	log := logger.WithMetadata(ctx)
 	if auth.url == "" {
 		return fmt.Errorf("empty opa url, cannot query policy")
