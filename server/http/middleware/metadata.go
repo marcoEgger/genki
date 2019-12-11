@@ -44,22 +44,20 @@ func ensureRequestID(r *http.Request, md *metadata.Metadata) {
 	// look for a default requestId header
 	reqId := r.Header.Get(RequestIDHeaderName)
 	if reqId != "" {
-		// maybe the gateway provided one
-		reqId = r.Header.Get(RequestIDGatewayHeaderName)
-		if reqId != "" {
-			(*md)[metadata.RequestIDKey] = reqId
-			return
-		}
+		(*md)[metadata.RequestIDKey] = reqId
+		return
 	}
 
-	// maybe there is a requestID from the api gw?
+	// maybe the gateway provided one
 	reqId = r.Header.Get(RequestIDGatewayHeaderName)
 	if reqId != "" {
 		(*md)[metadata.RequestIDKey] = reqId
 		return
 	}
 
-	(*md)[metadata.RequestIDKey] = metadata.NewRequestID()
+	reqID := metadata.NewRequestID()
+	(*md)[metadata.RequestIDKey] = reqID
+	r.Header.Set(RequestIDHeaderName, reqID)
 }
 
 func findAccountID(r *http.Request, md *metadata.Metadata) {
