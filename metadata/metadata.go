@@ -23,7 +23,7 @@ func NewContext(ctx context.Context, md Metadata) context.Context {
 }
 
 func NewOutgoingContext(ctx context.Context) context.Context {
-	 md := metadata.Pairs("accountId", "12", "userId", "7")
+	md := metadata.MD{}
 
 	 ctxMeta, ok := FromContext(ctx)
 	 if ok {
