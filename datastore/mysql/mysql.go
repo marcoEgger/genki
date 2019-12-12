@@ -77,3 +77,8 @@ func (m MySQL) Close() error {
 func (m MySQL) DB() *sqlx.DB {
 	return m.db
 }
+
+// Options returns the currently set options.
+func (m MySQL) Options() *Options {
+	return m.opts
+}
