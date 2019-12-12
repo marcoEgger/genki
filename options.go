@@ -29,7 +29,9 @@ func DisableDebugHttpServer() Option {
 
 func HttpDebugServerPort(port string) Option {
 	return func(opts *Options) {
-		opts.HttpDebugServerPort = port
+		if port != "" {
+			opts.HttpDebugServerPort = port
+		}
 	}
 }
 
