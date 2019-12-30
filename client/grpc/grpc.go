@@ -56,6 +56,6 @@ func (c *Client) Disconnect() {
 
 func (c *Client) Flags() *pflag.FlagSet {
 	fs := pflag.NewFlagSet(fmt.Sprintf("%s-client", c.name), pflag.ContinueOnError)
-	fs.String(fmt.Sprintf("%s-grpc-client-address", c.name), "localhost:50052", fmt.Sprintf("the upstream addess to which the %s-client will connect", c.name))
+	fs.String(fmt.Sprintf("%s-grpc-client-address", c.name), "localhost:50051", fmt.Sprintf("the upstream addess to which the %s-client will connect", c.name))
 	return fs
 }
