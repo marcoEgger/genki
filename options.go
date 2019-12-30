@@ -1,13 +1,14 @@
 package genki
 
-import "github.com/spf13/pflag"
-
-const (
-	DefaultName = "genki"
-	HttpDebugPortConfigKey = "http-debug-port"
-	HttpDebugDisableConfigKey = "http-debug-disable"
+import (
+	"github.com/spf13/pflag"
 )
 
+const (
+	DefaultName               = "genki"
+	HttpDebugPortConfigKey    = "http-debug-port"
+	HttpDebugDisableConfigKey = "http-debug-disable"
+)
 
 type Options struct {
 	Name                   string
