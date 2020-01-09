@@ -16,6 +16,7 @@ type Connection struct {
 	addr                  string
 	conn                  *amqp.Connection
 	connMutex             sync.Mutex
+	channel               *amqp.Channel
 	ctx                   context.Context
 	cancel                context.CancelFunc
 	connected             bool
@@ -151,8 +152,14 @@ func (c *Connection) setConnected(status bool) {
 	c.connected = status
 }
 
-func (c *Connection) Channel() (*amqp.Channel, error) {
+func (c *Connection) Channel() (channel *amqp.Channel, err error) {
 	c.connMutex.Lock()
+	if c.channel == nil {
+		c.channel, err = c.conn.Channel()
+		if err != nil {
+		   	return nil, err
+		}
+	}
 	defer c.connMutex.Unlock()
-	return c.conn.Channel()
+	return c.channel, nil
 }
