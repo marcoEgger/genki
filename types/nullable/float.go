@@ -2,6 +2,7 @@ package nullable
 
 import (
 	"database/sql"
+	"database/sql/driver"
 )
 
 type Float64 struct {
@@ -21,12 +22,12 @@ func NewFloat64(i float64) Float64 {
 	}}
 }
 
-func (i *Float64) Value() float64 {
-	if i.Valid {
-		return i.NullFloat64.Float64
-	} else {
-		return -1
+// Value implements the driver Valuer interface.
+func (i Float64) Value() (driver.Value, error) {
+	if !i.Valid {
+		return nil, nil
 	}
+	return i.Float64, nil
 }
 
 func (i *Float64) Scan(value interface{}) error {

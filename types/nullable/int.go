@@ -1,6 +1,9 @@
 package nullable
 
-import "database/sql"
+import (
+	"database/sql"
+	"database/sql/driver"
+)
 
 type Int64 struct {
 	sql.NullInt64
@@ -19,13 +22,12 @@ func NewInt64(i int64) Int64 {
 	}}
 }
 
-// Value returns the nullable's value.
-// An invalid value - representing NULL - is always -1
-func (i *Int64) Value() int64 {
-	if i.Valid {
-		return i.Int64
+// Value implements the driver Valuer interface.
+func (i Int64) Value() (driver.Value, error) {
+	if !i.Valid {
+		return nil, nil
 	}
-	return -1
+	return i.Int64, nil
 }
 
 type Int32 struct {
@@ -45,11 +47,10 @@ func NewInt32(i int32) Int32 {
 	}}
 }
 
-// Value returns the nullable's value.
-// An invalid value - representing NULL - is always -1
-func (i *Int32) Value() int32 {
-	if i.Valid {
-		return i.Int32
+// Value implements the driver Valuer interface.
+func (i Int32) Value() (driver.Value, error) {
+	if !i.Valid {
+		return nil, nil
 	}
-	return -1
+	return i.Int32, nil
 }

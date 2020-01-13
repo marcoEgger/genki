@@ -1,6 +1,9 @@
 package nullable
 
-import "database/sql"
+import (
+	"database/sql"
+	"database/sql/driver"
+)
 
 type String struct {
 	sql.NullString
@@ -23,11 +26,13 @@ func NewString(str string) String {
 	}
 }
 
-func (s *String) Value() string {
-	return s.String
-}
-
-func (s *String) Scan(value interface{}) error {
+func (s String) Scan(value interface{}) error {
 	return s.NullString.Scan(value)
 }
 
+func (s String) Value() (driver.Value, error) {
+	if !s.Valid {
+		return nil, nil
+	}
+	return s.String, nil
+}
