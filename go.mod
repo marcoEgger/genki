@@ -9,6 +9,8 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/etherlabsio/healthcheck v0.0.0-20190516102650-2b759a75f4be
+	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang/protobuf v1.3.2
@@ -16,6 +18,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/grpc-ecosystem/grpc-gateway v1.9.0
 	github.com/jmoiron/sqlx v1.2.0
+	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.8.1
@@ -25,5 +28,7 @@ require (
 	github.com/spf13/viper v1.5.0
 	github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271
 	go.uber.org/zap v1.12.0
+	google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
 	google.golang.org/grpc v1.24.0
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
