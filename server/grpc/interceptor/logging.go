@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 
 	"github.com/lukasjarosch/genki/logger"
 )
@@ -18,6 +19,18 @@ func UnaryServerLogging() grpc.UnaryServerInterceptor {
 				"took": time.Since(started),
 			})
 			if err != nil {
+				grpcStatus, hasGrpcStatus := status.FromError(err)
+
+				if hasGrpcStatus {
+					log := log.WithFields(logger.Fields{
+						"method":  info.FullMethod,
+						"status":  grpcStatus.Code().String(),
+						"details": grpcStatus.Details(),
+					})
+					log.Infof("finished unary request to: '%s' with status '%s' and message: '%s'", info.FullMethod, grpcStatus.Code().String(), grpcStatus.Message())
+					return
+				}
+
 				log.Infof("finished unary request to '%s', err=%s", info.FullMethod, err)
 				return
 			}
@@ -37,6 +50,18 @@ func UnaryClientLogging() grpc.UnaryClientInterceptor {
 				"took": time.Since(started),
 			})
 			if err != nil {
+				grpcStatus, hasGrpcStatus := status.FromError(err)
+
+				if hasGrpcStatus {
+					log := log.WithFields(logger.Fields{
+						"method":  method,
+						"status":  grpcStatus.Code().String(),
+						"details": grpcStatus.Details(),
+					})
+					log.Infof("finished unary request to: '%s' with status '%s' and message: '%s'", method, grpcStatus.Code().String(), grpcStatus.Message())
+					return
+				}
+
 				log.Infof("client call to '%s' (server=%s) failed: %s", method, cc.Target(), err)
 			} else {
 				log.Infof("client request to '%s' was successfully handled by server '%s'", method, cc.Target())
