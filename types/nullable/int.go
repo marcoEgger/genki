@@ -25,7 +25,7 @@ func NewInt64(i int64) Int64 {
 // Value implements the driver Valuer interface.
 func (i Int64) Value() (driver.Value, error) {
 	if !i.Valid {
-		return nil, nil
+		return -1, nil
 	}
 	return i.Int64, nil
 }
@@ -51,7 +51,7 @@ func NewInt32(i int32) Int32 {
 // The integer is converted to an int64 as Sql does not support int32 types
 func (i Int32) Value() (driver.Value, error) {
 	if !i.Valid {
-		return nil, nil
+		return -1, nil
 	}
 	return int64(i.Int32), nil
 }
