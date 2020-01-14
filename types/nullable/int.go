@@ -48,9 +48,10 @@ func NewInt32(i int32) Int32 {
 }
 
 // Value implements the driver Valuer interface.
+// The integer is converted to an int64 as Sql does not support int32 types
 func (i Int32) Value() (driver.Value, error) {
 	if !i.Valid {
 		return nil, nil
 	}
-	return i.Int32, nil
+	return int64(i.Int32), nil
 }
