@@ -2,21 +2,35 @@ package types
 
 import (
 	"fmt"
-	"strings"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
+	en_translations "github.com/go-playground/validator/v10/translations/en"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type ValidationError struct {
-	fieldErrors []validator.FieldError
+	fieldErrors validator.ValidationErrors
+	validator   *validator.Validate
+	translation ut.Translator
 }
 
-func NewValidationError(fieldErrors []validator.FieldError) error {
+func NewValidationError(errors validator.ValidationErrors, validator *validator.Validate) error {
+
+	en := en.New()
+	uni := ut.New(en, en)
+	trans, _ := uni.GetTranslator("en")
+	if err := en_translations.RegisterDefaultTranslations(validator, trans); err != nil {
+		return err
+	}
+
 	return ValidationError{
-		fieldErrors: fieldErrors,
+		fieldErrors: errors,
+		validator:   validator,
+		translation: trans,
 	}
 }
 
@@ -33,9 +47,13 @@ func (err ValidationError) GrpcStatus() *status.Status {
 	var violations []*errdetails.BadRequest_FieldViolation
 
 	for _, violation := range err.FieldErrors() {
+		var message string
+
+		message = violation.Translate(err.translation)
+
 		violations = append(violations, &errdetails.BadRequest_FieldViolation{
 			Field:       violation.StructNamespace(),
-			Description: strings.ToUpper(violation.Tag()),
+			Description: message,
 		})
 	}
 
