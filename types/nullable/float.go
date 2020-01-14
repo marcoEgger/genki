@@ -25,7 +25,7 @@ func NewFloat64(i float64) Float64 {
 // Value implements the driver Valuer interface.
 func (i Float64) Value() (driver.Value, error) {
 	if !i.Valid {
-		return -1, nil
+		return float64(-1), nil
 	}
 	return i.Float64, nil
 }
