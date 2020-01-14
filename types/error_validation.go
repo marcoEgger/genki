@@ -50,6 +50,7 @@ func (err ValidationError) GrpcStatus() *status.Status {
 		var message string
 
 		message = violation.Translate(err.translation)
+		message = message + fmt.Sprintf(", received '%v'", violation.Value())
 
 		violations = append(violations, &errdetails.BadRequest_FieldViolation{
 			Field:       violation.StructNamespace(),
