@@ -36,10 +36,6 @@ func (s Time) Value() (driver.Value, error) {
 	return s.Time, nil
 }
 
-func (s Time) Scan(value interface{}) error {
-	return s.NullTime.Scan(value)
-}
-
 func (s Time) Unix() int64 {
 	if s.Valid {
 		return s.Time.Unix()

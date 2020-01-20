@@ -26,10 +26,6 @@ func NewString(str string) String {
 	}
 }
 
-func (s String) Scan(value interface{}) error {
-	return s.NullString.Scan(value)
-}
-
 func (s String) Value() (driver.Value, error) {
 	if !s.Valid {
 		return nil, nil
