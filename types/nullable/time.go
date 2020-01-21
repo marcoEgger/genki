@@ -27,6 +27,26 @@ func NewTimeFromUnix(unix int64) Time {
 	}
 }
 
+func NewTime(t time.Time) Time {
+	if t.IsZero() || t.Unix() <= 0 {
+		return Time{sql.NullTime{
+			Time:  time.Time{},
+			Valid: false,
+		}}
+	}
+	return Time{sql.NullTime{
+		Time:  t,
+		Valid: true,
+	}}
+}
+
+func (s Time) Evaluated() time.Time {
+	if s.Valid {
+		return s.Time
+	}
+	return time.Time{}
+}
+
 
 // Value implements the driver Valuer interface.
 func (s Time) Value() (driver.Value, error) {

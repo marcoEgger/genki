@@ -34,3 +34,9 @@ func (i *Float64) Scan(value interface{}) error {
 	return i.NullFloat64.Scan(value)
 }
 
+func (i Float64) Evaluated() float64 {
+	if !i.Valid {
+		return -1
+	}
+	return i.Float64
+}

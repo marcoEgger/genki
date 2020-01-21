@@ -30,6 +30,13 @@ func (i Int64) Value() (driver.Value, error) {
 	return i.Int64, nil
 }
 
+func (i Int64) Evaluated() int64 {
+	if !i.Valid {
+		return -1
+	}
+	return i.Int64
+}
+
 type Int32 struct {
 	sql.NullInt32
 }
@@ -54,4 +61,11 @@ func (i Int32) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return int64(i.Int32), nil
+}
+
+func (i Int32) Evaluated() int32 {
+	if !i.Valid {
+		return -1
+	}
+	return i.Int32
 }
