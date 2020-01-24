@@ -10,6 +10,7 @@ import (
 	"github.com/golang-migrate/migrate/database/mysql"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
 type MySQL struct {
@@ -45,7 +46,7 @@ func New(dsn string, options ...Option) (*MySQL, error) {
 func (m MySQL) Migrate(version uint) error {
 	db, err := sql.Open(DriverName, m.dsn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "unable to open database connection")
 	}
 	driver, err := mysql.WithInstance(db, &mysql.Config{})
 	migrations, err := migrate.NewWithDatabaseInstance(
@@ -53,7 +54,7 @@ func (m MySQL) Migrate(version uint) error {
 		DriverName,
 		driver)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "unable initialize migrations")
 	}
 
 	err = migrations.Migrate(version)
@@ -61,7 +62,7 @@ func (m MySQL) Migrate(version uint) error {
 		if strings.Contains(err.Error(), "no change") {
 			return nil
 		}
-		return err
+		return errors.Wrap(err, "failed to apply migrations")
 	}
 
 	return nil
