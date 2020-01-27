@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 
 	"github.com/lukasjarosch/genki/config"
 	"github.com/lukasjarosch/genki/logger"
@@ -29,8 +30,14 @@ func (c *Client) Connect() (err error) {
 		return errors.New("missing client name")
 	}
 
+	// do nothing if a ready connection is already available
+	if c.conn != nil && c.conn.GetState() == connectivity.Ready {
+		return nil
+	}
+
+	addr := config.GetString(fmt.Sprintf("%s-grpc-client-address", c.name))
 	c.conn, err = grpc.Dial(
-		config.GetString(fmt.Sprintf("%s-grpc-client-address", c.name)),
+		addr,
 		grpc.WithInsecure(),
 		grpc.WithChainUnaryInterceptor(
 			interceptor.UnaryClientMetadata(),
@@ -38,8 +45,9 @@ func (c *Client) Connect() (err error) {
 		),
 	)
 	if err != nil {
-	    return errors.Wrap(err, fmt.Sprintf("grpc client connection '%s' failed", c.name))
+	    return errors.Wrap(err, fmt.Sprintf("gRPC client connection '%s' (%s) failed", c.name, addr))
 	}
+	logger.Infof("gRPC client connection to '%s' (%s) established", c.name, addr)
 
 	return nil
 }
