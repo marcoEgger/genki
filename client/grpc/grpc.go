@@ -18,8 +18,8 @@ type Client struct {
 	name string
 }
 
-func NewClient(name string) Client {
-	return Client{
+func NewClient(name string) *Client {
+	return &Client{
 		conn: nil,
 		name: name,
 	}
@@ -31,15 +31,21 @@ func (c *Client) Connect() (err error) {
 	}
 
 	// do nothing if a ready connection is already available
-	if c.conn != nil && c.conn.GetState() == connectivity.Ready {
-		return nil
+	if c.conn != nil {
+		if c.conn.GetState() == connectivity.Ready {
+			return nil
+		}
 	}
 
 	addr := config.GetString(fmt.Sprintf("%s-grpc-client-address", c.name))
+	if addr == "" {
+		return fmt.Errorf("missing address for client '%s'", c.name)
+	}
 	c.conn, err = grpc.Dial(
 		addr,
 		grpc.WithInsecure(),
 		grpc.WithChainUnaryInterceptor(
+			interceptor.UnaryClientPrometheus(),
 			interceptor.UnaryClientMetadata(),
 			interceptor.UnaryClientLogging(),
 		),
@@ -47,7 +53,6 @@ func (c *Client) Connect() (err error) {
 	if err != nil {
 	    return errors.Wrap(err, fmt.Sprintf("gRPC client connection '%s' (%s) failed", c.name, addr))
 	}
-	logger.Infof("gRPC client connection to '%s' (%s) established", c.name, addr)
 
 	return nil
 }
