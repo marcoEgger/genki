@@ -110,7 +110,7 @@ func findEmail(ctx context.Context, meta *md.Metadata) {
 		if len(email) > 0 {
 			emailEncoded := base64.StdEncoding.EncodeToString([]byte(email[0]))
 			(*meta)[md.EmailKey] = emailEncoded
-			ctx = metadata.AppendToOutgoingContext(ctx, md.RequestIDKey, emailEncoded)
+			ctx = metadata.AppendToOutgoingContext(ctx, md.EmailKey, emailEncoded)
 		}
 	}
 
@@ -125,7 +125,7 @@ func findFirstName(ctx context.Context, meta *md.Metadata) {
 		if len(firstName) > 0 {
 			firstNameEncoded := base64.StdEncoding.EncodeToString([]byte(firstName[0]))
 			(*meta)[md.FirstNameKey] = firstNameEncoded
-			ctx = metadata.AppendToOutgoingContext(ctx, md.RequestIDKey, firstNameEncoded)
+			ctx = metadata.AppendToOutgoingContext(ctx, md.FirstNameKey, firstNameEncoded)
 		}
 	}
 	// eventually the app context is filled with metadata
@@ -138,7 +138,7 @@ func findLastName(ctx context.Context, meta *md.Metadata) {
 		if len(lastName) > 0 {
 			lastNameEncoded := base64.StdEncoding.EncodeToString([]byte(lastName[0]))
 			(*meta)[md.LastNameKey] = lastNameEncoded
-			ctx = metadata.AppendToOutgoingContext(ctx, md.RequestIDKey, lastNameEncoded)
+			ctx = metadata.AppendToOutgoingContext(ctx, md.LastNameKey, lastNameEncoded)
 		}
 	}
 	// eventually the app context is filled with metadata
@@ -150,7 +150,7 @@ func findType(ctx context.Context, meta *md.Metadata) {
 		typ := header.Get(TypeMetadataKey)
 		if len(typ) > 0 {
 			(*meta)[md.TypeKey] = typ[0]
-			ctx = metadata.AppendToOutgoingContext(ctx, md.RequestIDKey, typ[0])
+			ctx = metadata.AppendToOutgoingContext(ctx, md.TypeKey, typ[0])
 		}
 	}
 	// eventually the app context is filled with metadata
@@ -162,7 +162,7 @@ func findSubType(ctx context.Context, meta *md.Metadata) {
 		subType := header.Get(SubTypeMetadataKey)
 		if len(subType) > 0 {
 			(*meta)[md.SubTypeKey] = subType[0]
-			ctx = metadata.AppendToOutgoingContext(ctx, md.RequestIDKey, subType[0])
+			ctx = metadata.AppendToOutgoingContext(ctx, md.SubTypeKey, subType[0])
 		}
 	}
 	// eventually the app context is filled with metadata
@@ -173,8 +173,8 @@ func findRoles(ctx context.Context, meta *md.Metadata) {
 	if header, ok := metadata.FromIncomingContext(ctx); ok {
 		roles := header.Get(RolesMetadataKey)
 		if len(roles) > 0 {
-			(*meta)[md.SubTypeKey] = roles[0]
-			ctx = metadata.AppendToOutgoingContext(ctx, md.RequestIDKey, roles[0])
+			(*meta)[md.RolesKey] = roles[0]
+			ctx = metadata.AppendToOutgoingContext(ctx, md.RolesKey, roles[0])
 		}
 	}
 	// eventually the app context is filled with metadata

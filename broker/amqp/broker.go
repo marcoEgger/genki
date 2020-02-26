@@ -172,14 +172,14 @@ func (b *Broker) ensureConnections() error {
 	if len(b.consumerDecls) > 0 && b.consumeConn == nil {
 		b.consumeConn = NewConnection(b.opts.Address)
 		if err := b.consumeConn.Connect(); err != nil {
-			return fmt.Errorf("failed to create amqp connection: %b", err)
+			return fmt.Errorf("failed to create amqp connection: %s", err)
 		}
 		logger.Debug("AMQP consumer connection established")
 	}
 	if b.produceConn == nil {
 		b.produceConn = NewConnection(b.opts.Address)
 		if err := b.produceConn.Connect(); err != nil {
-			return fmt.Errorf("failed to create amqp connection: %b", err)
+			return fmt.Errorf("failed to create amqp connection: %s", err)
 		}
 		logger.Debug("AMQP producer connection established")
 	}
