@@ -31,7 +31,7 @@ func UnaryServerLogging() grpc.UnaryServerInterceptor {
 					return
 				}
 
-				log.Errorf("finished unary request to '%s', err=%s", info.FullMethod, err)
+				log.Errorf("finished unary request to '%s' with error: %s", info.FullMethod, err)
 				return
 			}
 			log.Infof("finished unary request to '%s'", info.FullMethod)
