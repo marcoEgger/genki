@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"context"
+	"strings"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc/metadata"
@@ -48,4 +49,13 @@ func GetFromContext(ctx context.Context, key string) string {
 		return val
 	}
 	return ""
+}
+
+// HasRole returns true if the given role string occurs in metadata.roles
+func HasRole(ctx context.Context, role string) bool {
+	roleString := GetFromContext(ctx, RolesKey)
+	if strings.Contains(roleString, role) {
+		return true
+	}
+	return false
 }
