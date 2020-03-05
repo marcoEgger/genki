@@ -63,6 +63,7 @@ func (svc *application) Run() error {
 		if err := svc.broker.Initialize(); err != nil {
 			return fmt.Errorf("failed to initialize broker: %s", err)
 		}
+		logger.Infof("initialized broker")
 		svc.wg.Add(1)
 		go svc.broker.Consume(&svc.wg)
 	}

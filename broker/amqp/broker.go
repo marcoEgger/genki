@@ -50,7 +50,7 @@ func (b *Broker) Initialize() error {
 		ch, _ := b.consumeConn.Channel()
 		for _, declare := range b.consumerDecls {
 			if err := declare(ch); err != nil {
-				return fmt.Errorf("failed to declare for consumer: %b", err.Error())
+				return fmt.Errorf("failed to declare for consumer: %s", err.Error())
 			}
 		}
 	}
@@ -60,7 +60,7 @@ func (b *Broker) Initialize() error {
 		ch, _ := b.produceConn.Channel()
 		for _, declare := range b.producerDecls {
 			if err := declare(ch); err != nil {
-				return fmt.Errorf("failed to declare for producer: %b", err.Error())
+				return fmt.Errorf("failed to declare for producer: %s", err.Error())
 			}
 		}
 	}
@@ -143,6 +143,12 @@ func (b *Broker) Publish(exchange, routingKey string, message *broker.Message) e
 		DeliveryMode: 0,
 		Priority:     0,
 		Body:         message.Body,
+	}
+
+	if !b.produceConn.IsConnected() {
+		logger.Infof("amqp publish connection offline, waiting for reconnect")
+		b.consumeConn.WaitForConnection()
+		logger.Infof("amqp publish connection back online, consuming events")
 	}
 
 	channel, err := b.produceConn.Channel()

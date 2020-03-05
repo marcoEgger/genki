@@ -33,6 +33,7 @@ func NewConnection(addr string) *Connection {
 		addr:                  addr,
 		connMutex:             sync.Mutex{},
 		notifyCloseConnection: make(chan *amqp.Error),
+		connected:             false,
 	}
 
 	return c
@@ -56,6 +57,7 @@ func (c *Connection) WaitForConnection() {
 		select {
 		case <-t:
 			if c.IsConnected() {
+				c.setConnected(true)
 				return
 			}
 		case <-c.ctx.Done():
@@ -100,7 +102,7 @@ func (c *Connection) monitorConnection() {
 			return
 		case amqpErr, ok := <-c.notifyCloseConnection:
 			if ok {
-				logger.Warnf("amqp connection error (code %s): %s", amqpErr.Code, amqpErr.Reason)
+				logger.Warnf("amqp connection closed, attempting reconnect (code %d): %s", amqpErr.Code, amqpErr.Reason)
 				c.reconnect()
 			}
 		}
@@ -111,6 +113,7 @@ func (c *Connection) monitorConnection() {
 // the method only returns if a connection is established or the ctxReconnect context is cancelled by Shutdown()
 func (c *Connection) reconnect() {
 	var err error
+	c.setConnected(false)
 
 	for {
 		select {
@@ -141,8 +144,6 @@ func (c *Connection) changeConnection(connection *amqp.Connection) {
 }
 
 func (c *Connection) IsConnected() bool {
-	c.connMutex.Lock()
-	defer c.connMutex.Unlock()
 	return c.connected
 }
 
@@ -154,11 +155,9 @@ func (c *Connection) setConnected(status bool) {
 
 func (c *Connection) Channel() (channel *amqp.Channel, err error) {
 	c.connMutex.Lock()
-	if c.channel == nil {
-		c.channel, err = c.conn.Channel()
-		if err != nil {
-		   	return nil, err
-		}
+	c.channel, err = c.conn.Channel()
+	if err != nil {
+		return nil, err
 	}
 	defer c.connMutex.Unlock()
 	return c.channel, nil
