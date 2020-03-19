@@ -92,7 +92,7 @@ func (b *Broker) Consume(wg *sync.WaitGroup) {
 
 		err = channel.Qos(b.opts.PrefetchCount, 0, false)
 		if err != nil {
-			logger.Warnf("unable to set Qos on channel (prefetchCount=%d): %s", b.opts.PrefetchCount, err)
+			logger.Warnf("unable to set Qos on channel for consuming (prefetchCount=%d): %s", b.opts.PrefetchCount, err)
 			continue
 		}
 
@@ -147,7 +147,7 @@ func (b *Broker) Publish(exchange, routingKey string, message *broker.Message) e
 
 	if !b.produceConn.IsConnected() {
 		logger.Infof("amqp publish connection offline, waiting for reconnect")
-		b.consumeConn.WaitForConnection()
+		b.produceConn.WaitForConnection()
 		logger.Infof("amqp publish connection back online, consuming events")
 	}
 
@@ -177,6 +177,7 @@ func (b *Broker) Subscribe(exchange, routingKey string, handler broker.Handler) 
 func (b *Broker) ensureConnections() error {
 	if len(b.consumerDecls) > 0 && b.consumeConn == nil {
 		b.consumeConn = NewConnection(b.opts.Address)
+		b.consumeConn.SetName("consume")
 		if err := b.consumeConn.Connect(); err != nil {
 			return fmt.Errorf("failed to create amqp connection: %s", err)
 		}
@@ -184,6 +185,7 @@ func (b *Broker) ensureConnections() error {
 	}
 	if b.produceConn == nil {
 		b.produceConn = NewConnection(b.opts.Address)
+		b.produceConn.SetName("produce")
 		if err := b.produceConn.Connect(); err != nil {
 			return fmt.Errorf("failed to create amqp connection: %s", err)
 		}

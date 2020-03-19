@@ -2,6 +2,7 @@ package amqp
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ type Connection struct {
 	cancel                context.CancelFunc
 	connected             bool
 	notifyCloseConnection chan *amqp.Error
+	name                  string
 }
 
 const ReconnectDelay = 5 * time.Second
@@ -34,16 +36,21 @@ func NewConnection(addr string) *Connection {
 		connMutex:             sync.Mutex{},
 		notifyCloseConnection: make(chan *amqp.Error),
 		connected:             false,
+		name:                  "default",
 	}
 
 	return c
+}
+
+func (c *Connection) SetName(name string) {
+	c.name = name
 }
 
 // Consume will dial to the specified AMQP server addr.
 func (c *Connection) Connect() (err error) {
 	c.conn, err = c.dial()
 	if err != nil {
-		return errors.Wrap(err, "unable to connect to amqp server")
+		return errors.Wrap(err, fmt.Sprintf("%s: unable to connect to amqp server", c.name))
 	}
 
 	go c.monitorConnection()
@@ -74,7 +81,7 @@ func (c *Connection) Shutdown() {
 	if c.IsConnected() {
 		err := c.conn.Close()
 		if err != nil {
-			logger.Warnf("error while closing amqp connection: %s", err)
+			logger.Warnf("%s: error while closing amqp connection: %s", c.name, err)
 			return
 		}
 	}
@@ -102,7 +109,7 @@ func (c *Connection) monitorConnection() {
 			return
 		case amqpErr, ok := <-c.notifyCloseConnection:
 			if ok {
-				logger.Warnf("amqp connection closed, attempting reconnect (code %d): %s", amqpErr.Code, amqpErr.Reason)
+				logger.Warnf("%s: amqp connection closed, attempting reconnect (code %d): %s", c.name, amqpErr.Code, amqpErr.Reason)
 				c.reconnect()
 			}
 		}
@@ -123,11 +130,11 @@ func (c *Connection) reconnect() {
 		}
 		c.conn, err = c.dial()
 		if err != nil {
-			logger.Warnf("unable to connect to amqp server: %s", err)
+			logger.Warnf("%s: unable to connect to amqp server: %s", c.name, err)
 			time.Sleep(ReconnectDelay)
 			continue
 		}
-		logger.Info("reconnected to amqp server")
+		logger.Infof("%s: reconnected to amqp server", c.name)
 		c.setConnected(true)
 		return
 	}
@@ -150,15 +157,17 @@ func (c *Connection) IsConnected() bool {
 func (c *Connection) setConnected(status bool) {
 	c.connMutex.Lock()
 	defer c.connMutex.Unlock()
+
 	c.connected = status
 }
 
 func (c *Connection) Channel() (channel *amqp.Channel, err error) {
 	c.connMutex.Lock()
+	defer c.connMutex.Unlock()
+
 	c.channel, err = c.conn.Channel()
 	if err != nil {
 		return nil, err
 	}
-	defer c.connMutex.Unlock()
 	return c.channel, nil
 }
