@@ -10,4 +10,5 @@ const (
 	TypeKey      = "type"
 	SubTypeKey   = "subType"
 	RolesKey     = "roles"
+	InternalKey = "internal"
 )

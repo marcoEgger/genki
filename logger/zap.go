@@ -113,6 +113,7 @@ func (l *zapLogger) WithMetadata(ctx context.Context) Logger {
 	fields["meta."+metadata.TypeKey] = metadata.GetFromContext(ctx, metadata.TypeKey)
 	fields["meta."+metadata.SubTypeKey] = metadata.GetFromContext(ctx, metadata.SubTypeKey)
 	fields["meta."+metadata.RolesKey] = metadata.GetFromContext(ctx, metadata.RolesKey)
+	fields["meta."+metadata.InternalKey] = metadata.GetFromContext(ctx, metadata.InternalKey)
 
 	return log.WithFields(fields)
 }
