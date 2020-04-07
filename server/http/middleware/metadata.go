@@ -16,6 +16,7 @@ const LastNameHeaderName = "X-Last-Name"
 const TypeHeaderName = "X-Type"
 const SubTypeHeaderName = "X-Sub-Type"
 const RolesHeaderName = "X-Roles"
+const InternalHeaderName = "X-Internal"
 const RequestIDGatewayHeaderName = "eg-request-id"
 
 func Metadata(handler http.Handler) http.Handler {
@@ -32,6 +33,7 @@ func Metadata(handler http.Handler) http.Handler {
 		findType(r, &md)
 		findSubType(r, &md)
 		findRoles(r, &md)
+		findInternal(r, &md)
 
 		ctx = metadata.NewContext(ctx, md)
 
@@ -113,5 +115,12 @@ func findRoles(r *http.Request, md *metadata.Metadata) {
 	subType := r.Header.Get(RolesHeaderName)
 	if subType != "" {
 		(*md)[metadata.RolesKey] = subType
+	}
+}
+
+func findInternal(r *http.Request, md *metadata.Metadata) {
+	internal := r.Header.Get(InternalHeaderName)
+	if internal != "" {
+		(*md)[metadata.InternalKey] = internal
 	}
 }

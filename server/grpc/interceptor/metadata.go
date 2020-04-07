@@ -20,6 +20,7 @@ const LastNameMetadataKey = "lastName"
 const TypeMetadataKey = "type"
 const SubTypeMetadataKey = "subType"
 const RolesMetadataKey = "roles"
+const InternalMetadataKey = "internal"
 
 func UnaryServerMetadata() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
@@ -33,6 +34,7 @@ func UnaryServerMetadata() grpc.UnaryServerInterceptor {
 		findType(ctx, &meta)
 		findSubType(ctx, &meta)
 		findRoles(ctx, &meta)
+		findInternal(ctx, &meta)
 		ctx = md.NewContext(ctx, meta)
 
 		return handler(ctx, req)
@@ -51,6 +53,7 @@ func UnaryClientMetadata() grpc.UnaryClientInterceptor {
 		findType(ctx, &meta)
 		findSubType(ctx, &meta)
 		findRoles(ctx, &meta)
+		findInternal(ctx, &meta)
 		ctx = md.NewOutgoingContext(ctx)
 		ctx = md.NewContext(ctx, meta)
 
@@ -179,6 +182,18 @@ func findRoles(ctx context.Context, meta *md.Metadata) {
 	}
 	// eventually the app context is filled with metadata
 	_ = setAppContextValue(ctx, meta, md.RolesKey)
+}
+
+func findInternal(ctx context.Context, meta *md.Metadata) {
+	if header, ok := metadata.FromIncomingContext(ctx); ok {
+		internal := header.Get(InternalMetadataKey)
+		if len(internal) > 0 {
+			(*meta)[md.InternalKey] = internal[0]
+			ctx = metadata.AppendToOutgoingContext(ctx, md.RolesKey, internal[0])
+		}
+	}
+	// eventually the app context is filled with metadata
+	_ = setAppContextValue(ctx, meta, md.InternalKey)
 }
 
 // setAppContextValue will lookup the given metadata key in the GenkiMetadata struct
