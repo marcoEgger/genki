@@ -189,7 +189,7 @@ func findInternal(ctx context.Context, meta *md.Metadata) {
 		internal := header.Get(InternalMetadataKey)
 		if len(internal) > 0 {
 			(*meta)[md.InternalKey] = internal[0]
-			ctx = metadata.AppendToOutgoingContext(ctx, md.RolesKey, internal[0])
+			ctx = metadata.AppendToOutgoingContext(ctx, md.InternalKey, internal[0])
 		}
 	}
 	// eventually the app context is filled with metadata
