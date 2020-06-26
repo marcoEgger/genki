@@ -17,6 +17,18 @@ type gateway struct {
 	opts        *Options
 }
 
+var (
+	unaryInterceptors = []grpc.UnaryClientInterceptor{
+		interceptor.UnaryClientLogging(),
+		interceptor.UnaryClientPrometheus(),
+		interceptor.UnaryClientMetadata(),
+	}
+
+	dialOpts = []grpc.DialOption{
+		grpc.WithInsecure(),
+	}
+)
+
 type Gateway interface {
 	HttpMux() *runtime.ServeMux
 	GrpcDialOpts() []grpc.DialOption
@@ -38,27 +50,27 @@ func NewGateway(ctx context.Context, options ...Option) Gateway {
 	}
 
 	mux := runtime.NewServeMux(serveMuxOpts...)
-	dialOpts := []grpc.DialOption{
-		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(grpcmiddleware.ChainUnaryClient(
-			interceptor.UnaryClientLogging(),
-			interceptor.UnaryClientPrometheus(),
-			interceptor.UnaryClientMetadata(),
-		)),
-	}
 
 	gw := &gateway{
 		ctx:         ctx,
 		mux:         mux,
-		dialOptions: dialOpts,
 		opts:        opts,
 	}
+	gw.dialOptions = gw.dialWithOpts(dialOpts, unaryInterceptors)
 
 	return gw
 }
 
+func (gw *gateway) dialWithOpts(opts []grpc.DialOption, interceptors []grpc.UnaryClientInterceptor) []grpc.DialOption {
+	return append(opts, grpc.WithUnaryInterceptor(grpcmiddleware.ChainUnaryClient(interceptors...)))
+}
+
 func (gw *gateway) HttpMux() *runtime.ServeMux {
 	return gw.mux
+}
+
+func (gw *gateway) DialOptsWithUnaryInterceptors(interceptors ...grpc.UnaryClientInterceptor) []grpc.DialOption {
+	return gw.dialWithOpts(dialOpts, append(unaryInterceptors, interceptors...))
 }
 
 func (gw *gateway) GrpcDialOpts() []grpc.DialOption {
