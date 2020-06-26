@@ -33,6 +33,7 @@ type Gateway interface {
 	HttpMux() *runtime.ServeMux
 	GrpcDialOpts() []grpc.DialOption
 	Context() context.Context
+	DialOptsWithUnaryInterceptors(interceptors ...grpc.UnaryClientInterceptor) []grpc.DialOption
 }
 
 func NewGateway(ctx context.Context, options ...Option) Gateway {
@@ -52,9 +53,9 @@ func NewGateway(ctx context.Context, options ...Option) Gateway {
 	mux := runtime.NewServeMux(serveMuxOpts...)
 
 	gw := &gateway{
-		ctx:         ctx,
-		mux:         mux,
-		opts:        opts,
+		ctx:  ctx,
+		mux:  mux,
+		opts: opts,
 	}
 	gw.dialOptions = gw.dialWithOpts(dialOpts, unaryInterceptors)
 
