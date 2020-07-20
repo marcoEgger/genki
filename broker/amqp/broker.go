@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
@@ -87,6 +88,7 @@ func (b *Broker) Consume(wg *sync.WaitGroup) {
 		channel, err := b.consumeConn.Channel()
 		if err != nil {
 			logger.Warnf("unable to fetch AMQP channel for consumer: %s", err.Error())
+			time.Sleep(500 * time.Millisecond)
 			continue
 		}
 
