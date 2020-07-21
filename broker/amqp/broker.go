@@ -88,7 +88,7 @@ func (b *Broker) Consume(wg *sync.WaitGroup) {
 		channel, err := b.consumeConn.Channel()
 		if err != nil {
 			logger.Warnf("unable to fetch AMQP channel for consumer: %s", err.Error())
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(300 * time.Millisecond)
 			continue
 		}
 
