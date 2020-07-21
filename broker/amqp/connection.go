@@ -48,7 +48,7 @@ func (c *Connection) SetName(name string) {
 
 // Consume will dial to the specified AMQP server addr.
 func (c *Connection) Connect() (err error) {
-	c.conn, err = c.dial()
+	err = c.dial()
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("%s: unable to connect to amqp server", c.name))
 	}
@@ -77,6 +77,7 @@ func (c *Connection) WaitForConnection() {
 func (c *Connection) Shutdown() {
 	c.setConnected(false)
 	c.cancel()
+	_ = c.channel.Close()
 
 	if c.IsConnected() {
 		err := c.conn.Close()
@@ -88,16 +89,15 @@ func (c *Connection) Shutdown() {
 }
 
 // dial and return the connection and any occurred error
-func (c *Connection) dial() (*amqp.Connection, error) {
+func (c *Connection) dial() error {
 	c.setConnected(false)
-
 	conn, err := amqp.Dial(c.addr)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	c.changeConnection(conn)
 	c.setConnected(true)
-	return conn, nil
+	return nil
 }
 
 // monitorConnection ensures that the amqp connection is recovered on failures.
@@ -119,8 +119,11 @@ func (c *Connection) monitorConnection() {
 // reconnect will, once started, try to connect to amqp forever
 // the method only returns if a connection is established or the ctxReconnect context is cancelled by Shutdown()
 func (c *Connection) reconnect() {
-	var err error
 	c.setConnected(false)
+
+	// close the current channel and set to nil. the channel is only initialized when needed by Channel()
+	_ = c.channel.Close()
+	c.channel = nil
 
 	for {
 		select {
@@ -128,9 +131,10 @@ func (c *Connection) reconnect() {
 			return
 		default:
 		}
-		c.conn, err = c.dial()
+		err := c.dial()
 		if err != nil {
 			logger.Warnf("%s: unable to connect to amqp server: %s", c.name, err)
+			c.setConnected(false)
 			time.Sleep(ReconnectDelay)
 			continue
 		}
@@ -165,9 +169,11 @@ func (c *Connection) Channel() (channel *amqp.Channel, err error) {
 	c.connMutex.Lock()
 	defer c.connMutex.Unlock()
 
-	c.channel, err = c.conn.Channel()
-	if err != nil {
-		return nil, err
+	if c.channel == nil {
+		c.channel, err = c.conn.Channel()
+		if err != nil {
+			return nil, err
+		}
 	}
 	return c.channel, nil
 }
