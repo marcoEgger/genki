@@ -77,7 +77,9 @@ func (c *Connection) WaitForConnection() {
 func (c *Connection) Shutdown() {
 	c.setConnected(false)
 	c.cancel()
-	_ = c.channel.Close()
+	if c.channel != nil {
+		_ = c.channel.Close()
+	}
 
 	if c.IsConnected() {
 		err := c.conn.Close()
