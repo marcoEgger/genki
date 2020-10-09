@@ -41,6 +41,10 @@ const (
 )
 
 func NewLogger(level string) error {
+	if level == "" {
+		level = DefaultLevel
+	}
+
 	logger, err := newZapLogger(level, DefaultCallerSkip)
 	if err != nil {
 		return err
