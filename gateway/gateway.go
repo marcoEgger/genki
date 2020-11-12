@@ -42,13 +42,20 @@ func NewGateway(ctx context.Context, options ...Option) Gateway {
 	// configure gateway runtime options
 	serveMuxOpts := []runtime.ServeMuxOption{
 		runtime.WithIncomingHeaderMatcher(IncomingHeaderMatcher),
-		runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}),
 	}
 
 	// allow external response middleware
 	if opts.ResponseInterceptor != nil {
 		serveMuxOpts = append(serveMuxOpts, runtime.WithForwardResponseOption(opts.ResponseInterceptor))
 	}
+
+	// allow externally set ServeMuxOptions
+	if len(opts.ServeMuxOpts) > 0 {
+		serveMuxOpts = append(serveMuxOpts, opts.ServeMuxOpts...)
+	}
+
+	// register default marshaller
+	serveMuxOpts = append(serveMuxOpts, runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}))
 
 	mux := runtime.NewServeMux(serveMuxOpts...)
 
