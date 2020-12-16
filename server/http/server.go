@@ -33,7 +33,7 @@ func NewServer(opts ...Option) Server {
 // The 'Metadata' middleware is always the first middleware. It cannot be disabled.
 func (srv *server) Handle(endpoint string, handler http.Handler) {
 	if srv.opts.LoggingMiddlewareEnabled {
-		handler = middleware.Logging(handler, srv.opts.LoggingSkipEndpoints...)
+		handler = middleware.LoggingHandler(handler, srv.opts.LoggingSkipEndpoints...)
 		logger.Debugf("HTTP server '%s': logging middleware enabled for endpoint '%s'", srv.opts.Name, endpoint)
 	}
 	if srv.opts.PrometheusMiddlewareEnabled {
@@ -44,6 +44,7 @@ func (srv *server) Handle(endpoint string, handler http.Handler) {
 	logger.Debugf("HTTP server '%s': metadata middleware enabled for endpoint '%s'", srv.opts.Name, endpoint)
 	srv.mux.Handle(endpoint, handler)
 }
+
 
 // ListenAndServe the server in a separate goroutine.
 // Will block until the context is done.

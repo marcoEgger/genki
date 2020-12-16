@@ -28,3 +28,4 @@ func (swagger *swaggerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 
 	http.ServeFile(w, r, swagger.file)
 }
+

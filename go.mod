@@ -11,7 +11,6 @@ require (
 	github.com/etherlabsio/healthcheck v0.0.0-20190516102650-2b759a75f4be
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
-	github.com/go-playground/validator v9.31.0+incompatible // indirect
 	github.com/go-playground/validator/v10 v10.1.0
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang-migrate/migrate v3.5.4+incompatible
@@ -32,5 +31,4 @@ require (
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
 	google.golang.org/grpc v1.30.0
 	google.golang.org/protobuf v1.25.0 // indirect
-	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )

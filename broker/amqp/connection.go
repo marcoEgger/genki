@@ -172,9 +172,6 @@ func (c *Connection) Channel() (channel *amqp.Channel, err error) {
 		return nil, fmt.Errorf("amqp connection not alive")
 	}
 
-	c.connMutex.Lock()
-	defer c.connMutex.Unlock()
-
 	if c.channel == nil {
 		c.channel, err = c.conn.Channel()
 		if err != nil {

@@ -7,7 +7,7 @@ import (
 	"github.com/lukasjarosch/genki/logger"
 )
 
-func Logging(handler http.Handler, skipEndpoint ...string) http.Handler {
+func LoggingHandler(handler http.Handler, skipEndpoint ...string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sw := statusWriter{ResponseWriter: w}
 
@@ -34,3 +34,4 @@ func Logging(handler http.Handler, skipEndpoint ...string) http.Handler {
 		handler.ServeHTTP(&sw, r)
 	})
 }
+

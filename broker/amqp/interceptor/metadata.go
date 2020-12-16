@@ -9,6 +9,7 @@ func SubscriberMetadataInterceptor(next broker.Handler) broker.Handler {
 	return func(event broker.Event) {
 		meta := metadata.Metadata{}
 		ensureRequestId(&meta, event)
+		findAccountID(&meta, event)
 
 		ctx := metadata.NewContext(event.Message().Context, meta)
 		event.SetContext(ctx)
@@ -24,4 +25,12 @@ func ensureRequestId(meta *metadata.Metadata, event broker.Event) {
 		return
 	}
 	(*meta)[metadata.RequestIDKey] = requestID
+}
+
+
+func findAccountID(meta *metadata.Metadata, event broker.Event) {
+	accID := metadata.GetFromContext(event.Message().Context, metadata.AccountIDKey)
+	if accID != "" {
+		(*meta)[metadata.AccountIDKey] = accID
+	}
 }
