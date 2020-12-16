@@ -12,6 +12,7 @@ import (
 
 const (
 	RequestIDHeader = "requestId"
+	AccountIDHeader = "accountId"
 )
 
 type Event struct {

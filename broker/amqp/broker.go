@@ -140,6 +140,7 @@ func (b *Broker) Publish(exchange, routingKey string, message *broker.Message) e
 	pub := amqp.Publishing{
 		Headers: amqp.Table{
 			RequestIDHeader: metadata.GetFromContext(message.Context, metadata.RequestIDKey),
+			AccountIDHeader: metadata.GetFromContext(message.Context, metadata.AccountIDKey),
 		},
 		ContentType:  "application/octet-stream",
 		DeliveryMode: 0,
