@@ -2,6 +2,8 @@ package amqp
 
 import (
 	"context"
+	"fmt"
+	"github.com/lukasjarosch/genki/metadata"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/streadway/amqp"
@@ -23,11 +25,17 @@ type Event struct {
 }
 
 func NewEvent(queue, routingKey string, delivery amqp.Delivery) *Event {
+	md := metadata.Metadata{}
+	for k, v := range delivery.Headers {
+		md[k] = fmt.Sprint(v)
+	}
+	ctx := metadata.NewContext(context.Background(), md)
+
 	return &Event{
 		delivery:   delivery,
 		queue:      queue,
 		routingKey: routingKey,
-		context:    context.Background(),
+		context:    ctx,
 	}
 }
 
