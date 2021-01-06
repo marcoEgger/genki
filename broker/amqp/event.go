@@ -15,6 +15,7 @@ import (
 const (
 	RequestIDHeader = "requestId"
 	AccountIDHeader = "accountId"
+	UserIDHeader = "userId"
 )
 
 type Event struct {
@@ -25,6 +26,7 @@ type Event struct {
 }
 
 func NewEvent(queue, routingKey string, delivery amqp.Delivery) *Event {
+	// extract amqp headers and push them into metadata
 	md := metadata.Metadata{}
 	for k, v := range delivery.Headers {
 		md[k] = fmt.Sprint(v)
