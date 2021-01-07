@@ -124,8 +124,10 @@ func (c *Connection) reconnect() {
 	c.setConnected(false)
 
 	// close the current channel and set to nil. the channel is only initialized when needed by Channel()
-	_ = c.channel.Close()
-	c.channel = nil
+	if c.channel != nil {
+		_ = c.channel.Close()
+		c.channel = nil
+	}
 
 	for {
 		select {
