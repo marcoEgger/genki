@@ -1,9 +1,9 @@
 package broker
 
 import (
-	"github.com/lukasjarosch/genki/broker"
-	"github.com/lukasjarosch/genki/examples/stringer/internal/models"
-	"github.com/lukasjarosch/genki/examples/stringer/internal/proto"
+	"github.com/marcoEgger/genki/broker"
+	"github.com/marcoEgger/genki/examples/stringer/internal/models"
+	"github.com/marcoEgger/genki/examples/stringer/internal/proto"
 )
 
 const GreetingRenderedTopic = "greeting.rendered"

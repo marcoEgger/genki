@@ -3,9 +3,9 @@ package middleware
 import (
 	"context"
 
-	"github.com/lukasjarosch/genki/examples/stringer/internal/models"
-	"github.com/lukasjarosch/genki/examples/stringer/internal/stringer"
-	"github.com/lukasjarosch/genki/logger"
+	"github.com/marcoEgger/genki/examples/stringer/internal/models"
+	"github.com/marcoEgger/genki/examples/stringer/internal/stringer"
+	"github.com/marcoEgger/genki/logger"
 )
 
 type eventPublisher struct {

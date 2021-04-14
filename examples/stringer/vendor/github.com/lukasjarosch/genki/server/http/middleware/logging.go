@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/lukasjarosch/genki/logger"
+	"github.com/marcoEgger/genki/logger"
 )
 
 func Logging(handler http.Handler) http.Handler {

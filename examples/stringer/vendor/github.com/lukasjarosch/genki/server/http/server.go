@@ -8,8 +8,8 @@ import (
 
 	"github.com/etherlabsio/healthcheck"
 
-	"github.com/lukasjarosch/genki/logger"
-	"github.com/lukasjarosch/genki/server/http/middleware"
+	"github.com/marcoEgger/genki/logger"
+	"github.com/marcoEgger/genki/server/http/middleware"
 )
 
 type server struct {

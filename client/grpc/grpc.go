@@ -8,9 +8,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 
-	"github.com/lukasjarosch/genki/config"
-	"github.com/lukasjarosch/genki/logger"
-	"github.com/lukasjarosch/genki/server/grpc/interceptor"
+	"github.com/marcoEgger/genki/config"
+	"github.com/marcoEgger/genki/logger"
+	"github.com/marcoEgger/genki/server/grpc/interceptor"
 )
 
 type Client struct {
@@ -63,7 +63,7 @@ func (c *Client) Connect() (err error) {
 		),
 	)
 	if err != nil {
-	    return errors.Wrap(err, fmt.Sprintf("gRPC client connection '%s' (%s) failed", c.name, c.addr))
+		return errors.Wrap(err, fmt.Sprintf("gRPC client connection '%s' (%s) failed", c.name, c.addr))
 	}
 
 	return nil

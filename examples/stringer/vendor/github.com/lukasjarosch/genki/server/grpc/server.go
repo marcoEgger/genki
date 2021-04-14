@@ -11,8 +11,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 
-	"github.com/lukasjarosch/genki/logger"
-	"github.com/lukasjarosch/genki/server/grpc/interceptor"
+	"github.com/marcoEgger/genki/logger"
+	"github.com/marcoEgger/genki/server/grpc/interceptor"
 )
 
 type server struct {

@@ -3,7 +3,7 @@ package interceptor
 import (
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/lukasjarosch/genki/broker"
+	"github.com/marcoEgger/genki/broker"
 )
 
 var (

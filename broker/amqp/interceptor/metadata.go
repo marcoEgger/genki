@@ -1,8 +1,8 @@
 package interceptor
 
 import (
-	"github.com/lukasjarosch/genki/broker"
-	"github.com/lukasjarosch/genki/metadata"
+	"github.com/marcoEgger/genki/broker"
+	"github.com/marcoEgger/genki/metadata"
 )
 
 func SubscriberMetadataInterceptor(next broker.Handler) broker.Handler {
@@ -27,7 +27,6 @@ func ensureRequestId(meta *metadata.Metadata, event broker.Event) {
 	}
 	(*meta)[metadata.RequestIDKey] = requestID
 }
-
 
 func findAccountID(meta *metadata.Metadata, event broker.Event) {
 	accID := metadata.GetFromContext(event.Message().Context, metadata.AccountIDKey)

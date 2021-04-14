@@ -9,10 +9,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
 
-	"github.com/lukasjarosch/genki/broker"
-	"github.com/lukasjarosch/genki/broker/amqp/interceptor"
-	"github.com/lukasjarosch/genki/logger"
-	"github.com/lukasjarosch/genki/metadata"
+	"github.com/marcoEgger/genki/broker"
+	"github.com/marcoEgger/genki/broker/amqp/interceptor"
+	"github.com/marcoEgger/genki/logger"
+	"github.com/marcoEgger/genki/metadata"
 )
 
 type Broker struct {
@@ -141,7 +141,7 @@ func (b *Broker) Publish(exchange, routingKey string, message *broker.Message) e
 		Headers: amqp.Table{
 			RequestIDHeader: metadata.GetFromContext(message.Context, metadata.RequestIDKey),
 			AccountIDHeader: metadata.GetFromContext(message.Context, metadata.AccountIDKey),
-			UserIDHeader: metadata.GetFromContext(message.Context, metadata.UserIDKey),
+			UserIDHeader:    metadata.GetFromContext(message.Context, metadata.UserIDKey),
 		},
 		ContentType:  "application/octet-stream",
 		DeliveryMode: 0,

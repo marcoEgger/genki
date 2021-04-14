@@ -13,7 +13,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/lukasjarosch/genki/logger"
+	"github.com/marcoEgger/genki/logger"
 )
 
 func UnaryServerLogging() grpc.UnaryServerInterceptor {

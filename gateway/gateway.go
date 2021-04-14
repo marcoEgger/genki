@@ -7,7 +7,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 
-	"github.com/lukasjarosch/genki/server/grpc/interceptor"
+	"github.com/marcoEgger/genki/server/grpc/interceptor"
 )
 
 type gateway struct {

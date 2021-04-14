@@ -1,8 +1,8 @@
 package genki
 
 import (
-	"github.com/lukasjarosch/genki/broker"
-	"github.com/lukasjarosch/genki/server"
+	"github.com/marcoEgger/genki/broker"
+	"github.com/marcoEgger/genki/server"
 )
 
 // Application defines the application interface. It's designed to be simple and straightforward.

@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/lukasjarosch/genki/broker"
-	"github.com/lukasjarosch/genki/cli"
-	"github.com/lukasjarosch/genki/logger"
-	"github.com/lukasjarosch/genki/server"
-	"github.com/lukasjarosch/genki/server/http"
-	genki "github.com/lukasjarosch/genki/service"
+	"github.com/marcoEgger/genki/broker"
+	"github.com/marcoEgger/genki/cli"
+	"github.com/marcoEgger/genki/logger"
+	"github.com/marcoEgger/genki/server"
+	"github.com/marcoEgger/genki/server/http"
+	genki "github.com/marcoEgger/genki/service"
 )
 
 type application struct {

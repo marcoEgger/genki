@@ -9,8 +9,8 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/streadway/amqp"
 
-	"github.com/lukasjarosch/genki/broker"
-	"github.com/lukasjarosch/genki/logger"
+	"github.com/marcoEgger/genki/broker"
+	"github.com/marcoEgger/genki/logger"
 )
 
 

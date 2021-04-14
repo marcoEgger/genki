@@ -29,20 +29,20 @@ github.com/hashicorp/hcl/hcl/token
 github.com/hashicorp/hcl/json/parser
 github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
-# github.com/lukasjarosch/genki v0.0.0-20191103174705-04f7563b417a => ../../
-github.com/lukasjarosch/genki
-github.com/lukasjarosch/genki/broker
-github.com/lukasjarosch/genki/broker/amqp
-github.com/lukasjarosch/genki/cli
-github.com/lukasjarosch/genki/config
-github.com/lukasjarosch/genki/logger
-github.com/lukasjarosch/genki/metadata
-github.com/lukasjarosch/genki/server
-github.com/lukasjarosch/genki/server/grpc
-github.com/lukasjarosch/genki/server/grpc/interceptor
-github.com/lukasjarosch/genki/server/http
-github.com/lukasjarosch/genki/server/http/middleware
-github.com/lukasjarosch/genki/service
+# github.com/marcoEgger/genki v0.0.0-20191103174705-04f7563b417a => ../../
+github.com/marcoEgger/genki
+github.com/marcoEgger/genki/broker
+github.com/marcoEgger/genki/broker/amqp
+github.com/marcoEgger/genki/cli
+github.com/marcoEgger/genki/config
+github.com/marcoEgger/genki/logger
+github.com/marcoEgger/genki/metadata
+github.com/marcoEgger/genki/server
+github.com/marcoEgger/genki/server/grpc
+github.com/marcoEgger/genki/server/grpc/interceptor
+github.com/marcoEgger/genki/server/http
+github.com/marcoEgger/genki/server/http/middleware
+github.com/marcoEgger/genki/service
 # github.com/magiconair/properties v1.8.1
 github.com/magiconair/properties
 # github.com/matttproud/golang_protobuf_extensions v1.0.1

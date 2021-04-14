@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/lukasjarosch/genki/logger"
+	"github.com/marcoEgger/genki/logger"
 )
 
 type swaggerHandler struct {
@@ -28,4 +28,3 @@ func (swagger *swaggerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 
 	http.ServeFile(w, r, swagger.file)
 }
-

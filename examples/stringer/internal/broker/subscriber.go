@@ -6,10 +6,10 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/streadway/amqp"
 
-	"github.com/lukasjarosch/genki/broker"
-	pb "github.com/lukasjarosch/genki/examples/stringer/internal/proto"
-	"github.com/lukasjarosch/genki/examples/stringer/internal/stringer"
-	example "github.com/lukasjarosch/genki/examples/stringer/proto"
+	"github.com/marcoEgger/genki/broker"
+	pb "github.com/marcoEgger/genki/examples/stringer/internal/proto"
+	"github.com/marcoEgger/genki/examples/stringer/internal/stringer"
+	example "github.com/marcoEgger/genki/examples/stringer/proto"
 )
 
 func GreetingHappenedSubscriber(service stringer.Service) broker.Subscriber {

@@ -3,19 +3,19 @@ package amqp
 import (
 	"context"
 	"fmt"
-	"github.com/lukasjarosch/genki/metadata"
+	"github.com/marcoEgger/genki/metadata"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/streadway/amqp"
 
-	"github.com/lukasjarosch/genki/broker"
-	"github.com/lukasjarosch/genki/broker/amqp/interceptor"
+	"github.com/marcoEgger/genki/broker"
+	"github.com/marcoEgger/genki/broker/amqp/interceptor"
 )
 
 const (
 	RequestIDHeader = "requestId"
 	AccountIDHeader = "accountId"
-	UserIDHeader = "userId"
+	UserIDHeader    = "userId"
 )
 
 type Event struct {
@@ -64,7 +64,7 @@ func (evt *Event) Nack(retry bool) {
 
 	interceptor.NackCounter.With(prometheus.Labels{
 		"routing_key": evt.routingKey,
-		"requeue": req,
+		"requeue":     req,
 	}).Inc()
 
 	_ = evt.delivery.Nack(false, retry)

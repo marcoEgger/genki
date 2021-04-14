@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/streadway/amqp"
 
-	"github.com/lukasjarosch/genki/logger"
+	"github.com/marcoEgger/genki/logger"
 )
 
 // Connection is a wrapper for amqp.Connection but adding reconnection functionality.

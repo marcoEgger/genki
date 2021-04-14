@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/lukasjarosch/genki/metadata"
+	"github.com/marcoEgger/genki/metadata"
 )
 
 type zapLogger struct {

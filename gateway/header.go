@@ -5,8 +5,8 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
-	"github.com/lukasjarosch/genki/server/grpc/interceptor"
-	"github.com/lukasjarosch/genki/server/http/middleware"
+	"github.com/marcoEgger/genki/server/grpc/interceptor"
+	"github.com/marcoEgger/genki/server/http/middleware"
 )
 
 // IncomingHeaderMatcher will rewrite HTTP header keys into gRPC header keys.

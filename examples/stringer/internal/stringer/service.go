@@ -3,7 +3,7 @@ package stringer
 import (
 	"context"
 
-	"github.com/lukasjarosch/genki/examples/stringer/internal/models"
+	"github.com/marcoEgger/genki/examples/stringer/internal/models"
 )
 
 type Service interface {

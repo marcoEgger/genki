@@ -11,13 +11,13 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 
-	"github.com/lukasjarosch/genki/logger"
-	"github.com/lukasjarosch/genki/metadata"
+	"github.com/marcoEgger/genki/logger"
+	"github.com/marcoEgger/genki/metadata"
 )
 
 const (
 	OpenPolicyAgentUrlConfigKey = "opa-url"
-	OpenPolicyAgentDefaultUrl = "http://localhost:8181/v1/data/authz/"
+	OpenPolicyAgentDefaultUrl   = "http://localhost:8181/v1/data/authz/"
 )
 
 type opa struct {
@@ -25,7 +25,7 @@ type opa struct {
 }
 
 func NewOpenPolicyAgentClient(opaUrl string) *opa {
-	return &opa{url:opaUrl}
+	return &opa{url: opaUrl}
 }
 
 func (auth *opa) Authorize(ctx context.Context, resourceId, action interface{}, externalData interface{}) error {
@@ -36,7 +36,7 @@ func (auth *opa) Authorize(ctx context.Context, resourceId, action interface{}, 
 
 	payload := map[string]interface{}{
 		"resource": resourceId,
-		"action": action,
+		"action":   action,
 		"external": externalData,
 	}
 
@@ -53,14 +53,14 @@ func (auth *opa) Authorize(ctx context.Context, resourceId, action interface{}, 
 
 	jsonData, err := json.Marshal(input)
 	if err != nil {
-	    return errors.Wrap(err, "unable to marshal payload to JSON")
+		return errors.Wrap(err, "unable to marshal payload to JSON")
 	}
 
 	log.Debugf("sending authorization request: %v", string(jsonData))
 	reqStart := time.Now()
 	resp, err := http.Post(auth.url, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-	    return errors.Wrap(err, "Authorize failed")
+		return errors.Wrap(err, "Authorize failed")
 	}
 	defer resp.Body.Close()
 

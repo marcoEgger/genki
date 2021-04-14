@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"net/http"
 
-	"github.com/lukasjarosch/genki/metadata"
+	"github.com/marcoEgger/genki/metadata"
 )
 
 const RequestIDHeaderName = "X-Request-ID"

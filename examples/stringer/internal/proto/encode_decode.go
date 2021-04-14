@@ -4,8 +4,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/lukasjarosch/genki/examples/stringer/internal/models"
-	example "github.com/lukasjarosch/genki/examples/stringer/proto"
+	"github.com/marcoEgger/genki/examples/stringer/internal/models"
+	example "github.com/marcoEgger/genki/examples/stringer/proto"
 )
 
 func ErrorToProto(err error) error {

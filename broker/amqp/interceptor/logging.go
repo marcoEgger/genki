@@ -3,8 +3,8 @@ package interceptor
 import (
 	"time"
 
-	"github.com/lukasjarosch/genki/broker"
-	"github.com/lukasjarosch/genki/logger"
+	"github.com/marcoEgger/genki/broker"
+	"github.com/marcoEgger/genki/logger"
 )
 
 func SubscriberLoggerInterceptor(next broker.Handler) broker.Handler {

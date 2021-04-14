@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
-	md "github.com/lukasjarosch/genki/metadata"
+	md "github.com/marcoEgger/genki/metadata"
 )
 
 const RequestIdMetadataKey = "requestId"

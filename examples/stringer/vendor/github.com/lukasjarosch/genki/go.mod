@@ -1,4 +1,4 @@
-module github.com/lukasjarosch/genki
+module github.com/marcoEgger/genki
 
 go 1.13
 

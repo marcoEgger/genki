@@ -3,7 +3,7 @@ package http
 import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/lukasjarosch/genki/logger"
+	"github.com/marcoEgger/genki/logger"
 )
 
 // NewDebugServer is a convenience wrapper to quickly create a HTTP server, serving on port 3000.

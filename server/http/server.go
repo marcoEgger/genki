@@ -8,8 +8,8 @@ import (
 
 	"github.com/etherlabsio/healthcheck"
 
-	"github.com/lukasjarosch/genki/logger"
-	"github.com/lukasjarosch/genki/server/http/middleware"
+	"github.com/marcoEgger/genki/logger"
+	"github.com/marcoEgger/genki/server/http/middleware"
 )
 
 type server struct {
@@ -44,7 +44,6 @@ func (srv *server) Handle(endpoint string, handler http.Handler) {
 	logger.Debugf("HTTP server '%s': metadata middleware enabled for endpoint '%s'", srv.opts.Name, endpoint)
 	srv.mux.Handle(endpoint, handler)
 }
-
 
 // ListenAndServe the server in a separate goroutine.
 // Will block until the context is done.

@@ -5,8 +5,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/lukasjarosch/genki/examples/stringer/internal/models"
-	"github.com/lukasjarosch/genki/examples/stringer/internal/stringer"
+	"github.com/marcoEgger/genki/examples/stringer/internal/models"
+	"github.com/marcoEgger/genki/examples/stringer/internal/stringer"
 )
 
 var (

@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/lukasjarosch/genki/metadata"
+	"github.com/marcoEgger/genki/metadata"
 )
 
 const RequestIDHeaderName = "X-Request-ID"

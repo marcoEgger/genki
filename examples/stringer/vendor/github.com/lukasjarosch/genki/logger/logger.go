@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/lukasjarosch/genki/config"
+	"github.com/marcoEgger/genki/config"
 )
 
 // Global log instance to be able to directly access the log functions
