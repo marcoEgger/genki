@@ -3,6 +3,8 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"github.com/jmoiron/sqlx"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 	"sync"
 	"time"
@@ -21,6 +23,42 @@ type server struct {
 
 	// only set if the gRPC health server is enabled
 	healthz *health.Server
+}
+
+type HealthChecker struct {
+	db   *sqlx.DB
+	opts Options
+}
+
+func (s *HealthChecker) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
+	if req.GetService() != "" && req.GetService() != s.opts.Name {
+		return &grpc_health_v1.HealthCheckResponse{
+			Status: grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN,
+		}, nil
+	}
+
+	if err := s.db.Ping(); err != nil {
+		return &grpc_health_v1.HealthCheckResponse{
+			Status: grpc_health_v1.HealthCheckResponse_SERVING,
+		}, nil
+	} else {
+		return &grpc_health_v1.HealthCheckResponse{
+			Status: grpc_health_v1.HealthCheckResponse_NOT_SERVING,
+		}, nil
+	}
+}
+
+func (s *HealthChecker) Watch(req *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
+	return server.Send(&grpc_health_v1.HealthCheckResponse{
+		Status: grpc_health_v1.HealthCheckResponse_SERVING,
+	})
+}
+
+func NewHealthChecker(db *sqlx.DB, opts ...Option) *HealthChecker {
+	return &HealthChecker{
+		db:   db,
+		opts: newOptions(opts...),
+	}
 }
 
 func NewServer(opts ...Option) Server {
@@ -51,11 +89,11 @@ func NewServer(opts ...Option) Server {
 // ListenAndServe ties everything together and runs the gRPC server in a separate goroutine.
 // The method then blocks until the passed context is cancelled, so this method should also be started
 // as goroutine if more work is needed after starting the gRPC server.
-func (srv *server) ListenAndServe(ctx context.Context, wg *sync.WaitGroup) {
+func (srv *server) ListenAndServe(ctx context.Context, wg *sync.WaitGroup, healthServer *grpc_health_v1.HealthServer) {
 	defer wg.Done()
 
 	if srv.opts.HealthServerEnabled {
-		srv.registerHealthServer()
+		srv.registerHealthServer(healthServer)
 	}
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", srv.opts.Port))

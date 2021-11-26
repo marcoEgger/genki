@@ -15,10 +15,14 @@ const (
 
 // registerHealthServer will register a gRPC v1 Health server.
 // The serving status will be set to NOT_SERVING.
-func (srv *server) registerHealthServer() {
+func (srv *server) registerHealthServer(healthServer *grpc_health_v1.HealthServer) {
 	srv.healthz = health.NewServer()
 	srv.healthz.SetServingStatus(srv.opts.Name, HealthUnknown)
-	grpc_health_v1.RegisterHealthServer(srv.grpc, srv.healthz)
+	if healthServer != nil {
+		grpc_health_v1.RegisterHealthServer(srv.grpc, *healthServer)
+	} else {
+		grpc_health_v1.RegisterHealthServer(srv.grpc, health.NewServer())
+	}
 	logger.Infof("gRPC health for server '%s' enabled", srv.opts.Name)
 }
 

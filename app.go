@@ -3,6 +3,7 @@ package genki
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"sync"
 
 	"github.com/marcoEgger/genki/broker"
@@ -14,14 +15,15 @@ import (
 )
 
 type application struct {
-	servers    []server.Server
-	broker     broker.Broker
-	opts       Options
-	stopChan   <-chan struct{}
-	appContext context.Context
-	cancel     context.CancelFunc
-	wg         sync.WaitGroup
-	flags      *cli.FlagSet
+	servers     []server.Server
+	httpServers []http.Server
+	broker      broker.Broker
+	opts        Options
+	stopChan    <-chan struct{}
+	appContext  context.Context
+	cancel      context.CancelFunc
+	wg          sync.WaitGroup
+	flags       *cli.FlagSet
 }
 
 func newService(opts ...Option) *application {
@@ -49,12 +51,12 @@ func (svc *application) Name() string {
 // - If a broker is configured, Declare() and Consume() are called
 // - Every server in the serverlist is started
 // - Wait for signal...
-func (svc *application) Run() error {
+func (svc *application) Run(healthServer *grpc_health_v1.HealthServer) error {
 	defer svc.cancel()
 
 	// add the debug HTTP server if enabled
 	if svc.opts.HttpDebugServerEnabled {
-		svc.AddServer(http.NewDebugServer(
+		svc.AddHttpServer(http.NewDebugServer(
 			svc.opts.HttpDebugServerPort,
 		))
 	}
@@ -70,6 +72,11 @@ func (svc *application) Run() error {
 
 	// start all registered servers in a goroutine
 	for _, srv := range svc.servers {
+		svc.wg.Add(1)
+		go srv.ListenAndServe(svc.appContext, &svc.wg, healthServer)
+	}
+	// start all registered http servers in a goroutine
+	for _, srv := range svc.httpServers {
 		svc.wg.Add(1)
 		go srv.ListenAndServe(svc.appContext, &svc.wg)
 	}
@@ -89,6 +96,11 @@ func (svc *application) Run() error {
 // AddServer registers a new server with the application
 func (svc *application) AddServer(srv server.Server) {
 	svc.servers = append(svc.servers, srv)
+}
+
+// AddHttpServer registers a new http server with the application
+func (svc *application) AddHttpServer(srv http.Server) {
+	svc.httpServers = append(svc.httpServers, srv)
 }
 
 // Add a broker to the application. The broker is invoked in Run().
