@@ -42,6 +42,7 @@ func (s *HealthChecker) Check(ctx context.Context, req *grpc_health_v1.HealthChe
 			Status: grpc_health_v1.HealthCheckResponse_SERVING,
 		}, nil
 	} else {
+		logger.Errorf("not serving: %s", err)
 		return &grpc_health_v1.HealthCheckResponse{
 			Status: grpc_health_v1.HealthCheckResponse_NOT_SERVING,
 		}, nil
