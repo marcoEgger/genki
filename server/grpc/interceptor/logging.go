@@ -12,30 +12,33 @@ import (
 
 func UnaryServerLogging() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-		log := logger.WithMetadata(ctx)
-		log.Infof("incoming unary request to '%s'", info.FullMethod)
-		defer func(started time.Time) {
-			log = logger.WithFields(logger.Fields{
-				"took": time.Since(started),
-			})
-			if err != nil {
-				grpcStatus, hasGrpcStatus := status.FromError(err)
 
-				if hasGrpcStatus {
-					log := log.WithFields(logger.Fields{
-						"method":  info.FullMethod,
-						"status":  grpcStatus.Code().String(),
-						"details": grpcStatus.Details(),
-					})
-					log.Infof("finished unary request to: '%s' with status '%s' and message: '%s'", info.FullMethod, grpcStatus.Code().String(), grpcStatus.Message())
+		if info.FullMethod != "/grpc.health.v1.Health/Check" {
+			log := logger.WithMetadata(ctx)
+			log.Infof("incoming unary request to '%s'", info.FullMethod)
+			defer func(started time.Time) {
+				log = logger.WithFields(logger.Fields{
+					"took": time.Since(started),
+				})
+				if err != nil {
+					grpcStatus, hasGrpcStatus := status.FromError(err)
+
+					if hasGrpcStatus {
+						log := log.WithFields(logger.Fields{
+							"method":  info.FullMethod,
+							"status":  grpcStatus.Code().String(),
+							"details": grpcStatus.Details(),
+						})
+						log.Infof("finished unary request to: '%s' with status '%s' and message: '%s'", info.FullMethod, grpcStatus.Code().String(), grpcStatus.Message())
+						return
+					}
+
+					log.Errorf("finished unary request to '%s' with error: %s", info.FullMethod, err)
 					return
 				}
-
-				log.Errorf("finished unary request to '%s' with error: %s", info.FullMethod, err)
-				return
-			}
-			log.Infof("finished unary request to '%s'", info.FullMethod)
-		}(time.Now())
+				log.Infof("finished unary request to '%s'", info.FullMethod)
+			}(time.Now())
+		}
 
 		return handler(ctx, req)
 	}
