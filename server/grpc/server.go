@@ -37,7 +37,7 @@ func (s *HealthChecker) Check(ctx context.Context, req *grpc_health_v1.HealthChe
 		}, nil
 	}
 
-	if err := s.db.Ping(); err != nil {
+	if err := s.db.Ping(); err == nil {
 		return &grpc_health_v1.HealthCheckResponse{
 			Status: grpc_health_v1.HealthCheckResponse_SERVING,
 		}, nil
