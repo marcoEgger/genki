@@ -51,7 +51,7 @@ func (svc *application) Name() string {
 // - If a broker is configured, Declare() and Consume() are called
 // - Every server in the serverlist is started
 // - Wait for signal...
-func (svc *application) Run(healthServer *grpc_health_v1.HealthServer) error {
+func (svc *application) Run(healthServer grpc_health_v1.HealthServer) error {
 	defer svc.cancel()
 
 	// add the debug HTTP server if enabled

@@ -7,6 +7,6 @@ import (
 )
 
 type Server interface {
-	ListenAndServe(ctx context.Context, wg *sync.WaitGroup, healthServer *grpc_health_v1.HealthServer)
+	ListenAndServe(ctx context.Context, wg *sync.WaitGroup, healthServer grpc_health_v1.HealthServer)
 }
 

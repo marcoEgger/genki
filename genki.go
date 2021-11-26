@@ -13,7 +13,7 @@ type Application interface {
 	Name() string
 	// Run the application. This is a blocking call and will only return if the
 	// server is shut-down or an error occurred.
-	Run(healthServer *grpc_health_v1.HealthServer) error
+	Run(healthServer grpc_health_v1.HealthServer) error
 	// Opts returns the current options
 	Opts() Options
 	// AddServer registers a new server with the application

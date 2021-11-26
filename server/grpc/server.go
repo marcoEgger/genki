@@ -89,7 +89,7 @@ func NewServer(opts ...Option) Server {
 // ListenAndServe ties everything together and runs the gRPC server in a separate goroutine.
 // The method then blocks until the passed context is cancelled, so this method should also be started
 // as goroutine if more work is needed after starting the gRPC server.
-func (srv *server) ListenAndServe(ctx context.Context, wg *sync.WaitGroup, healthServer *grpc_health_v1.HealthServer) {
+func (srv *server) ListenAndServe(ctx context.Context, wg *sync.WaitGroup, healthServer grpc_health_v1.HealthServer) {
 	defer wg.Done()
 
 	if srv.opts.HealthServerEnabled {
