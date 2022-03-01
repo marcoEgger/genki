@@ -27,6 +27,10 @@ type server struct {
 	healthz *health.Server
 }
 
+type BasicHealthChecker struct {
+	opts Options
+}
+
 type MySQLHealthChecker struct {
 	db   *sqlx.DB
 	opts Options
@@ -35,6 +39,24 @@ type MySQLHealthChecker struct {
 type MongodbHealthChecker struct {
 	db   *mongo.Client
 	opts Options
+}
+
+func (s *BasicHealthChecker) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
+	if req.GetService() != "" && req.GetService() != s.opts.Name {
+		return &grpc_health_v1.HealthCheckResponse{
+			Status: grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN,
+		}, nil
+	}
+
+	return &grpc_health_v1.HealthCheckResponse{
+		Status: grpc_health_v1.HealthCheckResponse_SERVING,
+	}, nil
+}
+
+func (s *BasicHealthChecker) Watch(req *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
+	return server.Send(&grpc_health_v1.HealthCheckResponse{
+		Status: grpc_health_v1.HealthCheckResponse_SERVING,
+	})
 }
 
 func (s *MySQLHealthChecker) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
@@ -85,6 +107,12 @@ func (s *MongodbHealthChecker) Watch(req *grpc_health_v1.HealthCheckRequest, ser
 	return server.Send(&grpc_health_v1.HealthCheckResponse{
 		Status: grpc_health_v1.HealthCheckResponse_SERVING,
 	})
+}
+
+func NewBasicHealthChecker(opts ...Option) *BasicHealthChecker {
+	return &BasicHealthChecker{
+		opts: newOptions(opts...),
+	}
 }
 
 func NewMySQLHealthChecker(db *sqlx.DB, opts ...Option) *MySQLHealthChecker {
