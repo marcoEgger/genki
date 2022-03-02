@@ -40,9 +40,17 @@ func (auth *opa) Authorize(ctx context.Context, resourceId, action interface{}, 
 		"external": externalData,
 	}
 
+	if metadata.GetFromContext(ctx, metadata.InternalKey) == "true" {
+		payload["internal"] = true
+	}
+
 	if metadata.GetFromContext(ctx, metadata.UserIDKey) != "" {
 		payload["user"] = metadata.GetFromContext(ctx, metadata.UserIDKey)
 		payload["account"] = metadata.GetFromContext(ctx, metadata.AccountIDKey)
+		payload["roles"] = metadata.GetFromContext(ctx, metadata.RolesKey)
+		payload["type"] = metadata.GetFromContext(ctx, metadata.TypeKey)
+		payload["subType"] = metadata.GetFromContext(ctx, metadata.SubTypeKey)
+		payload["email"] = metadata.GetFromContext(ctx, metadata.EmailKey)
 	} else {
 		payload["roles"] = []string{"anonymous"}
 	}
