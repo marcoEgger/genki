@@ -175,6 +175,11 @@ func (b *Broker) Subscribe(exchange, routingKey string, handler broker.Handler) 
 	return nil
 }
 
+func (b *Broker) EnsureExchange(exchange string) {
+	b.producerDecls = append(b.producerDecls, AutoExchange(exchange))
+	logger.Infof("ensured amqp exchange %s", exchange)
+}
+
 // ensureConnections is responsible for creating and establishing the required connections.
 // We use separate AMQP connections for publish and subscribe. The publish connection is active by default,
 // whereas the consumer connection is only started if a subscriber is added.

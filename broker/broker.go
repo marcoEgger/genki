@@ -15,15 +15,21 @@ type Message struct {
 // Broker is the interface which defines the client connection(s) to a concrete broker like amqp
 type Broker interface {
 	Publisher
+	Subscriber
 	Initialize() error
-	Consume(group *sync.WaitGroup)
 	Disconnect() error
+	Consume(group *sync.WaitGroup)
+}
+
+// Subscriber can subscribe to exchanges with a routingKey
+type Subscriber interface {
 	Subscribe(exchange, routingKey string, handler Handler) error
 }
 
 // Publisher can publish messages with a routingKey to the message-broker
 type Publisher interface {
 	Publish(exchange, routingKey string, message *Message) error
+	EnsureExchange(exchange string)
 }
 
 type Handler func(event Event)
