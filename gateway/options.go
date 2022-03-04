@@ -2,8 +2,8 @@ package gateway
 
 import (
 	"context"
+	"github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"google.golang.org/protobuf/proto"
 	"net/http"
 )
 
