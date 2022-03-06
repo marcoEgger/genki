@@ -18,7 +18,7 @@ func newViperConfig() *config {
 func (c config) BindFlags(set *pflag.FlagSet) {
 	err := viper.BindPFlags(set)
 	if err != nil {
-	    return
+		return
 	}
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
@@ -26,6 +26,10 @@ func (c config) BindFlags(set *pflag.FlagSet) {
 
 func (c config) GetString(key string) string {
 	return viper.GetString(key)
+}
+
+func (c config) GetInt(key string) int {
+	return viper.GetInt(key)
 }
 
 func (c config) GetBool(key string) bool {

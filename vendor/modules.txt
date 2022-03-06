@@ -4,6 +4,9 @@ github.com/beorn7/perks/quantile
 # github.com/cespare/xxhash/v2 v2.1.2
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
+# github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f
+## explicit
+github.com/dgryski/go-rendezvous
 # github.com/etherlabsio/healthcheck v0.0.0-20191224061800-dd3d2fd8c3f6
 ## explicit; go 1.12
 github.com/etherlabsio/healthcheck
@@ -22,6 +25,19 @@ github.com/go-playground/universal-translator
 ## explicit; go 1.13
 github.com/go-playground/validator/v10
 github.com/go-playground/validator/v10/translations/en
+# github.com/go-redis/cache/v8 v8.4.3
+## explicit; go 1.13
+github.com/go-redis/cache/v8
+# github.com/go-redis/redis/v8 v8.11.4
+## explicit; go 1.13
+github.com/go-redis/redis/v8
+github.com/go-redis/redis/v8/internal
+github.com/go-redis/redis/v8/internal/hashtag
+github.com/go-redis/redis/v8/internal/hscan
+github.com/go-redis/redis/v8/internal/pool
+github.com/go-redis/redis/v8/internal/proto
+github.com/go-redis/redis/v8/internal/rand
+github.com/go-redis/redis/v8/internal/util
 # github.com/go-sql-driver/mysql v1.6.0
 ## explicit; go 1.10
 github.com/go-sql-driver/mysql
@@ -54,8 +70,6 @@ github.com/golang/snappy
 # github.com/google/uuid v1.3.0
 ## explicit
 github.com/google/uuid
-# github.com/gorilla/mux v1.8.0
-## explicit; go 1.12
 # github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 ## explicit; go 1.14
 github.com/grpc-ecosystem/go-grpc-middleware
@@ -92,6 +106,7 @@ github.com/klauspost/compress
 github.com/klauspost/compress/fse
 github.com/klauspost/compress/huff0
 github.com/klauspost/compress/internal/snapref
+github.com/klauspost/compress/s2
 github.com/klauspost/compress/zstd
 github.com/klauspost/compress/zstd/internal/xxhash
 # github.com/leodido/go-urn v1.2.1
@@ -108,9 +123,6 @@ github.com/matttproud/golang_protobuf_extensions/pbutil
 github.com/mitchellh/mapstructure
 # github.com/opencontainers/image-spec v1.0.2
 ## explicit
-# github.com/patrickmn/go-cache v2.1.0+incompatible
-## explicit
-github.com/patrickmn/go-cache
 # github.com/pelletier/go-toml v1.9.4
 ## explicit; go 1.12
 github.com/pelletier/go-toml
@@ -165,6 +177,18 @@ github.com/streadway/amqp
 # github.com/subosito/gotenv v1.2.0
 ## explicit
 github.com/subosito/gotenv
+# github.com/vmihailenco/go-tinylfu v0.2.2
+## explicit; go 1.15
+github.com/vmihailenco/go-tinylfu
+# github.com/vmihailenco/msgpack/v5 v5.3.4
+## explicit; go 1.11
+github.com/vmihailenco/msgpack/v5
+github.com/vmihailenco/msgpack/v5/msgpcode
+# github.com/vmihailenco/tagparser/v2 v2.0.0
+## explicit; go 1.15
+github.com/vmihailenco/tagparser/v2
+github.com/vmihailenco/tagparser/v2/internal
+github.com/vmihailenco/tagparser/v2/internal/parser
 # github.com/xdg-go/pbkdf2 v1.0.0
 ## explicit; go 1.9
 github.com/xdg-go/pbkdf2
@@ -232,6 +256,9 @@ go.uber.org/zap/zapcore
 golang.org/x/crypto/ocsp
 golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/sha3
+# golang.org/x/exp v0.0.0-20210916165020-5cb4fee858ee
+## explicit; go 1.17
+golang.org/x/exp/rand
 # golang.org/x/net v0.0.0-20211013171255-e13a2654a71e
 ## explicit; go 1.17
 golang.org/x/net/http/httpguts
@@ -243,6 +270,7 @@ golang.org/x/net/trace
 # golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 ## explicit
 golang.org/x/sync/errgroup
+golang.org/x/sync/singleflight
 # golang.org/x/sys v0.0.0-20220114195835-da31bd327af9
 ## explicit; go 1.17
 golang.org/x/sys/cpu
@@ -356,5 +384,3 @@ gopkg.in/ini.v1
 # gopkg.in/yaml.v2 v2.4.0
 ## explicit; go 1.15
 gopkg.in/yaml.v2
-# gotest.tools/v3 v3.1.0
-## explicit; go 1.11

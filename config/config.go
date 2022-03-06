@@ -19,6 +19,7 @@ func NewConfig() Config {
 type Config interface {
 	BindFlags(set *pflag.FlagSet)
 	GetString(key string) string
+	GetInt(key string) int
 	GetBool(key string) bool
 	GetDuration(key string) time.Duration
 }
@@ -29,6 +30,10 @@ func BindFlagSet(set *pflag.FlagSet) {
 
 func GetString(key string) string {
 	return cfg.GetString(key)
+}
+
+func GetInt(key string) int {
+	return cfg.GetInt(key)
 }
 
 func GetBool(key string) bool {
