@@ -66,8 +66,10 @@ func (svc *application) Run(healthServer grpc_health_v1.HealthServer) error {
 			return fmt.Errorf("failed to initialize broker: %s", err)
 		}
 		logger.Infof("initialized broker")
-		svc.wg.Add(1)
-		go svc.broker.Consume(&svc.wg)
+		if svc.broker.HasConsumer() {
+			svc.wg.Add(1)
+			go svc.broker.Consume(&svc.wg)
+		}
 	}
 
 	// start all registered servers in a goroutine

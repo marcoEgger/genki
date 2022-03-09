@@ -47,7 +47,7 @@ func (b *Broker) Initialize() error {
 	}
 
 	// declare all the subscriber things!
-	if len(b.consumerDecls) > 0 {
+	if b.HasConsumer() {
 		ch, _ := b.consumeConn.Channel()
 		for _, declare := range b.consumerDecls {
 			if err := declare(ch); err != nil {
@@ -67,6 +67,10 @@ func (b *Broker) Initialize() error {
 	}
 
 	return nil
+}
+
+func (b *Broker) HasConsumer() bool {
+	return len(b.consumerDecls) > 0
 }
 
 func (b *Broker) Consume(wg *sync.WaitGroup) {

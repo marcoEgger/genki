@@ -19,6 +19,7 @@ type Broker interface {
 	Initialize() error
 	Disconnect() error
 	Consume(group *sync.WaitGroup)
+	HasConsumer() bool
 }
 
 // Subscriber can subscribe to exchanges with a routingKey
