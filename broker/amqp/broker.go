@@ -126,9 +126,9 @@ func (b *Broker) Consume(wg *sync.WaitGroup) {
 
 func (b *Broker) Disconnect() error {
 	defer b.stopConsuming()
-	defer b.waitGroup.Done()
 
-	if b.consumeConn != nil {
+	if b.HasConsumer() && b.consumeConn != nil {
+		defer b.waitGroup.Done()
 		b.consumeConn.Shutdown()
 		logger.Debug("amqp consumer connection closed")
 	}
@@ -188,7 +188,7 @@ func (b *Broker) EnsureExchange(exchange string) {
 // We use separate AMQP connections for publish and subscribe. The publish connection is active by default,
 // whereas the consumer connection is only started if a subscriber is added.
 func (b *Broker) ensureConnections() error {
-	if len(b.consumerDecls) > 0 && b.consumeConn == nil {
+	if b.HasConsumer() && b.consumeConn == nil {
 		b.consumeConn = NewConnection(b.opts.Address)
 		b.consumeConn.SetName("consume")
 		if err := b.consumeConn.Connect(); err != nil {
