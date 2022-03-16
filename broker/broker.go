@@ -39,7 +39,8 @@ type Handler func(event Event)
 type Event interface {
 	Message() *Message
 	Ack()
-	Nack(retry bool)
+	Nack(requeue bool)
+	Reject(requeue bool)
 	QueueName() string
 	RoutingKey() string
 	SetContext(ctx context.Context)
