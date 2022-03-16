@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"context"
+	"encoding/base64"
 	"strings"
 
 	"github.com/google/uuid"
@@ -12,7 +13,7 @@ import (
 // throughout different transport layers (gRPC, HTTP, AMQP, ...).
 type Metadata map[string]string
 
-type key struct {}
+type key struct{}
 
 func FromContext(ctx context.Context) (Metadata, bool) {
 	md, ok := ctx.Value(key{}).(Metadata)
@@ -26,14 +27,17 @@ func NewContext(ctx context.Context, md Metadata) context.Context {
 func NewOutgoingContext(ctx context.Context) context.Context {
 	md := metadata.MD{}
 
-	 ctxMeta, ok := FromContext(ctx)
-	 if ok {
-		 for key, value := range ctxMeta {
+	ctxMeta, ok := FromContext(ctx)
+	if ok {
+		for key, value := range ctxMeta {
+			if key == EmailKey || key == FirstNameKey || key == LastNameKey {
+				md.Set(key, base64.StdEncoding.EncodeToString([]byte(value)))
+			}
 			md.Set(key, value)
-		 }
-	 }
-	 outCtx := metadata.NewOutgoingContext(ctx, md)
-	 return outCtx
+		}
+	}
+	outCtx := metadata.NewOutgoingContext(ctx, md)
+	return outCtx
 }
 
 func NewRequestID() string {
