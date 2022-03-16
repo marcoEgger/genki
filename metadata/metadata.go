@@ -32,8 +32,9 @@ func NewOutgoingContext(ctx context.Context) context.Context {
 		for key, value := range ctxMeta {
 			if key == EmailKey || key == FirstNameKey || key == LastNameKey {
 				md.Set(key, base64.StdEncoding.EncodeToString([]byte(value)))
+			} else {
+				md.Set(key, value)
 			}
-			md.Set(key, value)
 		}
 	}
 	outCtx := metadata.NewOutgoingContext(ctx, md)
