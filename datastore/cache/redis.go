@@ -7,6 +7,7 @@ import (
 	"github.com/marcoEgger/genki/config"
 	"github.com/marcoEgger/genki/logger"
 	"github.com/spf13/pflag"
+	"time"
 )
 
 const (
@@ -23,7 +24,10 @@ func NewRedisCache() *cache.Cache {
 			return nil
 		},
 	})
-	return cache.New(&cache.Options{Redis: redisClient})
+	return cache.New(&cache.Options{
+		Redis:      redisClient,
+		LocalCache: cache.NewTinyLFU(5000, time.Minute),
+	})
 }
 
 func Flags() *pflag.FlagSet {
