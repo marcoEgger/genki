@@ -12,6 +12,8 @@ import (
 )
 
 const RequestIdMetadataKey = "requestId"
+const M2MMetadataKey = "m2m"
+const AccountIdsMetadataKey = "accountIds"
 const AccountIdMetadataKey = "accountId"
 const UserIdMetadataKey = "userId"
 const EmailMetadataKey = "email"
@@ -26,6 +28,8 @@ func UnaryServerMetadata() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		meta := md.Metadata{}
 		ensureRequestId(ctx, &meta)
+		findM2M(ctx, &meta)
+		findAccountIds(ctx, &meta)
 		findAccountId(ctx, &meta)
 		findUserId(ctx, &meta)
 		findEmail(ctx, &meta)
@@ -45,6 +49,8 @@ func UnaryClientMetadata() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
 		meta := md.Metadata{}
 		ensureRequestId(ctx, &meta)
+		findM2M(ctx, &meta)
+		findAccountIds(ctx, &meta)
 		findAccountId(ctx, &meta)
 		findUserId(ctx, &meta)
 		findEmail(ctx, &meta)
@@ -79,6 +85,30 @@ func ensureRequestId(ctx context.Context, meta *md.Metadata) {
 	reqId := md.NewRequestID()
 	(*meta)[md.RequestIDKey] = reqId
 	ctx = metadata.AppendToOutgoingContext(ctx, md.RequestIDKey, reqId)
+}
+
+func findM2M(ctx context.Context, meta *md.Metadata) {
+	if header, ok := metadata.FromIncomingContext(ctx); ok {
+		m2m := header.Get(M2MMetadataKey)
+		if len(m2m) > 0 {
+			(*meta)[md.M2MKey] = m2m[0]
+			ctx = metadata.AppendToOutgoingContext(ctx, md.M2MKey, m2m[0])
+		}
+	}
+	// eventually the app context is filled with metadata
+	_ = setAppContextValue(ctx, meta, md.M2MKey)
+}
+
+func findAccountIds(ctx context.Context, meta *md.Metadata) {
+	if header, ok := metadata.FromIncomingContext(ctx); ok {
+		accountIds := header.Get(AccountIdsMetadataKey)
+		if len(accountIds) > 0 {
+			(*meta)[md.AccountIDsKey] = accountIds[0]
+			ctx = metadata.AppendToOutgoingContext(ctx, md.AccountIDsKey, accountIds[0])
+		}
+	}
+	// eventually the app context is filled with metadata
+	_ = setAppContextValue(ctx, meta, md.AccountIDsKey)
 }
 
 func findAccountId(ctx context.Context, meta *md.Metadata) {
@@ -120,7 +150,6 @@ func findEmail(ctx context.Context, meta *md.Metadata) {
 	// eventually the app context is filled with metadata
 	_ = setAppContextValue(ctx, meta, md.EmailKey)
 }
-
 
 func findFirstName(ctx context.Context, meta *md.Metadata) {
 	if header, ok := metadata.FromIncomingContext(ctx); ok {

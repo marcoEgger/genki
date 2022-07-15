@@ -14,6 +14,10 @@ import (
 // The header comparison is case-insensitive.
 func IncomingHeaderMatcher(key string) (string, bool) {
 	switch strings.ToLower(key) {
+	case strings.ToLower(middleware.M2MHeaderName):
+		return interceptor.M2MMetadataKey, true
+	case strings.ToLower(middleware.AccountIDsHeaderName):
+		return interceptor.AccountIdsMetadataKey, true
 	case strings.ToLower(middleware.AccountIDHeaderName):
 		return interceptor.AccountIdMetadataKey, true
 	case strings.ToLower(middleware.UserIDHeaderName):

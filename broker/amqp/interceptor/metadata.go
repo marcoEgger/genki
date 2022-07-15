@@ -11,6 +11,8 @@ func SubscriberMetadataInterceptor(next broker.Handler) broker.Handler {
 	return func(event broker.Event) {
 		meta := metadata.Metadata{}
 		ensureRequestId(&meta, event)
+		findM2M(&meta, event)
+		findAccountIDs(&meta, event)
 		findAccountID(&meta, event)
 		findUserID(&meta, event)
 		findEmail(&meta, event)
@@ -35,6 +37,20 @@ func ensureRequestId(meta *metadata.Metadata, event broker.Event) {
 		return
 	}
 	(*meta)[metadata.RequestIDKey] = requestID
+}
+
+func findM2M(meta *metadata.Metadata, event broker.Event) {
+	m2m := metadata.GetFromContext(event.Message().Context, metadata.M2MKey)
+	if m2m != "" {
+		(*meta)[metadata.M2MKey] = m2m
+	}
+}
+
+func findAccountIDs(meta *metadata.Metadata, event broker.Event) {
+	accountIds := metadata.GetFromContext(event.Message().Context, metadata.AccountIDsKey)
+	if accountIds != "" {
+		(*meta)[metadata.AccountIDsKey] = accountIds
+	}
 }
 
 func findAccountID(meta *metadata.Metadata, event broker.Event) {
