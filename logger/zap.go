@@ -108,6 +108,8 @@ func (l *zapLogger) WithFields(keyValues Fields) Logger {
 func (l *zapLogger) WithMetadata(ctx context.Context) Logger {
 	fields := make(Fields)
 	fields["meta."+metadata.RequestIDKey] = metadata.GetFromContext(ctx, metadata.RequestIDKey)
+	fields["meta."+metadata.M2MKey] = metadata.GetFromContext(ctx, metadata.M2MKey)
+	fields["meta."+metadata.AccountIDsKey] = metadata.GetFromContext(ctx, metadata.AccountIDsKey)
 	fields["meta."+metadata.AccountIDKey] = metadata.GetFromContext(ctx, metadata.AccountIDKey)
 	fields["meta."+metadata.UserIDKey] = metadata.GetFromContext(ctx, metadata.UserIDKey)
 	fields["meta."+metadata.TypeKey] = metadata.GetFromContext(ctx, metadata.TypeKey)
