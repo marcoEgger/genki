@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -44,7 +45,11 @@ func (auth *opa) Authorize(ctx context.Context, resourceId, action interface{}, 
 		payload["internal"] = true
 	}
 
-	if metadata.GetFromContext(ctx, metadata.UserIDKey) != "" {
+	if metadata.GetFromContext(ctx, metadata.M2MKey) == "true" {
+		payload["m2m"] = true
+		payload["accounts"] = strings.Split(metadata.GetFromContext(ctx, metadata.AccountIDsKey), ",")
+		payload["roles"] = strings.Split(metadata.GetFromContext(ctx, metadata.RolesKey), ",")
+	} else if metadata.GetFromContext(ctx, metadata.UserIDKey) != "" {
 		payload["user"] = metadata.GetFromContext(ctx, metadata.UserIDKey)
 		payload["account"] = metadata.GetFromContext(ctx, metadata.AccountIDKey)
 		payload["roles"] = metadata.GetFromContext(ctx, metadata.RolesKey)

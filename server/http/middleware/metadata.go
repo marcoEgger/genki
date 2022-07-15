@@ -8,6 +8,8 @@ import (
 )
 
 const RequestIDHeaderName = "X-Request-ID"
+const M2MHeaderName = "X-M2M"
+const AccountIDsHeaderName = "X-Account-IDs"
 const AccountIDHeaderName = "X-Account-ID"
 const UserIDHeaderName = "X-User-ID"
 const EmailHeaderName = "X-E-Mail"
@@ -25,6 +27,8 @@ func Metadata(handler http.Handler) http.Handler {
 		md := metadata.Metadata{}
 
 		ensureRequestID(r, &md)
+		findM2M(r, &md)
+		findAccountIDs(r, &md)
 		findAccountID(r, &md)
 		findUserID(r, &md)
 		findEmail(r, &md)
@@ -60,6 +64,20 @@ func ensureRequestID(r *http.Request, md *metadata.Metadata) {
 	reqID := metadata.NewRequestID()
 	(*md)[metadata.RequestIDKey] = reqID
 	r.Header.Set(RequestIDHeaderName, reqID)
+}
+
+func findM2M(r *http.Request, md *metadata.Metadata) {
+	m2m := r.Header.Get(M2MHeaderName)
+	if m2m != "" {
+		(*md)[metadata.M2MKey] = m2m
+	}
+}
+
+func findAccountIDs(r *http.Request, md *metadata.Metadata) {
+	accIDs := r.Header.Get(AccountIDsHeaderName)
+	if accIDs != "" {
+		(*md)[metadata.AccountIDsKey] = accIDs
+	}
 }
 
 func findAccountID(r *http.Request, md *metadata.Metadata) {
