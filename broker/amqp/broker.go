@@ -92,19 +92,21 @@ func (b *Broker) Consume(wg *sync.WaitGroup) {
 		channel, err := b.consumeConn.Channel()
 		if err != nil {
 			logger.Warnf("unable to fetch AMQP channel for consumer: %s", err.Error())
-			time.Sleep(300 * time.Millisecond)
+			time.Sleep(500 * time.Millisecond)
 			continue
 		}
 
 		err = channel.Qos(b.opts.PrefetchCount, 0, false)
 		if err != nil {
 			logger.Warnf("unable to set Qos on channel for consuming (prefetchCount=%d): %s", b.opts.PrefetchCount, err)
+			time.Sleep(500 * time.Millisecond)
 			continue
 		}
 
 		deliveries, err := channel.Consume(b.opts.SubscriberQueue, b.opts.ConsumerName, false, false, false, false, nil)
 		if err != nil {
 			logger.Error("amqp consumer error: %s", err)
+			time.Sleep(500 * time.Millisecond)
 			continue
 		}
 
