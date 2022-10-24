@@ -119,6 +119,8 @@ func (b *Broker) Consume(wg *sync.WaitGroup) {
 				handler = interceptor.SubscriberLoggerInterceptor(handler)
 				handler = interceptor.SubscriberMetadataInterceptor(handler)
 				handler(event)
+			} else {
+				logger.Errorf("handler not defined for %s", routingKey)
 			}
 		}
 	}
