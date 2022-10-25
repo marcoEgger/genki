@@ -141,7 +141,7 @@ func NewServer(opts ...Option) Server {
 	var unaryInterceptors []grpc.UnaryServerInterceptor
 
 	unaryInterceptors = append(unaryInterceptors, otelgrpc.UnaryServerInterceptor(otelgrpc.WithInterceptorFilter(func(info *otelgrpc.InterceptorInfo) bool {
-		if info.Method == "check" {
+		if info.UnaryServerInfo != nil && info.UnaryServerInfo.FullMethod == "/grpc.health.v1.Health/Check" {
 			return false
 		}
 		return true
