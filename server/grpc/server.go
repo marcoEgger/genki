@@ -42,7 +42,7 @@ type MongodbHealthChecker struct {
 	opts Options
 }
 
-func (s *BasicHealthChecker) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
+func (s *BasicHealthChecker) Check(_ context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
 	if req.GetService() != "" && req.GetService() != s.opts.Name {
 		return &grpc_health_v1.HealthCheckResponse{
 			Status: grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN,
@@ -54,13 +54,13 @@ func (s *BasicHealthChecker) Check(ctx context.Context, req *grpc_health_v1.Heal
 	}, nil
 }
 
-func (s *BasicHealthChecker) Watch(req *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
+func (s *BasicHealthChecker) Watch(_ *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
 	return server.Send(&grpc_health_v1.HealthCheckResponse{
 		Status: grpc_health_v1.HealthCheckResponse_SERVING,
 	})
 }
 
-func (s *MySQLHealthChecker) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
+func (s *MySQLHealthChecker) Check(_ context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
 	if req.GetService() != "" && req.GetService() != s.opts.Name {
 		return &grpc_health_v1.HealthCheckResponse{
 			Status: grpc_health_v1.HealthCheckResponse_SERVICE_UNKNOWN,
@@ -79,7 +79,7 @@ func (s *MySQLHealthChecker) Check(ctx context.Context, req *grpc_health_v1.Heal
 	}
 }
 
-func (s *MySQLHealthChecker) Watch(req *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
+func (s *MySQLHealthChecker) Watch(_ *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
 	return server.Send(&grpc_health_v1.HealthCheckResponse{
 		Status: grpc_health_v1.HealthCheckResponse_SERVING,
 	})
@@ -104,18 +104,20 @@ func (s *MongodbHealthChecker) Check(ctx context.Context, req *grpc_health_v1.He
 	}
 }
 
-func (s *MongodbHealthChecker) Watch(req *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
+func (s *MongodbHealthChecker) Watch(_ *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
 	return server.Send(&grpc_health_v1.HealthCheckResponse{
 		Status: grpc_health_v1.HealthCheckResponse_SERVING,
 	})
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func NewBasicHealthChecker(opts ...Option) *BasicHealthChecker {
 	return &BasicHealthChecker{
 		opts: newOptions(opts...),
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func NewMySQLHealthChecker(db *sqlx.DB, opts ...Option) *MySQLHealthChecker {
 	return &MySQLHealthChecker{
 		db:   db,
@@ -123,6 +125,7 @@ func NewMySQLHealthChecker(db *sqlx.DB, opts ...Option) *MySQLHealthChecker {
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func NewMongoDBHealthChecker(db *mongo.Client, opts ...Option) *MongodbHealthChecker {
 	return &MongodbHealthChecker{
 		db:   db,
@@ -130,13 +133,19 @@ func NewMongoDBHealthChecker(db *mongo.Client, opts ...Option) *MongodbHealthChe
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func NewServer(opts ...Option) Server {
 	options := newOptions(opts...)
 	srv := &server{opts: options}
 
 	var unaryInterceptors []grpc.UnaryServerInterceptor
 
-	unaryInterceptors = append(unaryInterceptors, otelgrpc.UnaryServerInterceptor())
+	unaryInterceptors = append(unaryInterceptors, otelgrpc.UnaryServerInterceptor(otelgrpc.WithInterceptorFilter(func(info *otelgrpc.InterceptorInfo) bool {
+		if info.Method == "check" {
+			return false
+		}
+		return true
+	})))
 
 	unaryInterceptors = append(unaryInterceptors, interceptor.UnaryServerMetadata())
 	logger.Debugf("gRPC server '%s': metadata interceptor enabled", srv.opts.Name)
@@ -194,7 +203,7 @@ func (srv *server) Server() *grpc.Server {
 	return srv.grpc
 }
 
-// shutdown is responsible of gracefully shutting down the gRPC server
+// shutdown is responsible for gracefully shutting down the gRPC server
 // First, GracefulStop() is executed. If the call doesn't return
 // until the ShutdownGracePeriod is exceeded, the server is terminated directly.
 func (srv *server) shutdown() {
