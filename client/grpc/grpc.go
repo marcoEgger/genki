@@ -2,11 +2,12 @@ package grpc
 
 import (
 	"fmt"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/marcoEgger/genki/config"
 	"github.com/marcoEgger/genki/logger"
@@ -19,6 +20,7 @@ type Client struct {
 	addr string
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func NewClient(name string) *Client {
 	return &Client{
 		conn: nil,
@@ -26,6 +28,7 @@ func NewClient(name string) *Client {
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func NewClientWithAddress(name, address string) *Client {
 	return &Client{
 		conn: nil,
@@ -55,8 +58,9 @@ func (c *Client) Connect() (err error) {
 	}
 	c.conn, err = grpc.Dial(
 		c.addr,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainUnaryInterceptor(
+			otelgrpc.UnaryClientInterceptor(),
 			interceptor.UnaryClientPrometheus(),
 			interceptor.UnaryClientMetadata(),
 			interceptor.UnaryClientLogging(),

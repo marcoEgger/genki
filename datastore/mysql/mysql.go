@@ -11,6 +11,9 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+
+	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
+	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
 )
 
 type MySQL struct {
@@ -22,10 +25,13 @@ type MySQL struct {
 const DriverName = "mysql"
 
 // New will connect to the MySQL server using the given DSN
+//
+//goland:noinspection GoUnusedExportedFunction
 func New(dsn string, options ...Option) (*MySQL, error) {
 	opts := newOptions(options...)
 
-	db, err := sqlx.Connect(DriverName, dsn)
+	//db, err := sqlx.Connect(DriverName, dsn)
+	db, err := splunksql.Open(DriverName, dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +42,7 @@ func New(dsn string, options ...Option) (*MySQL, error) {
 	db.SetConnMaxLifetime(opts.MaxConnectionLifetime)
 
 	return &MySQL{
-		db:   db,
+		db:   sqlx.NewDb(db, DriverName),
 		dsn:  dsn,
 		opts: opts,
 	}, nil

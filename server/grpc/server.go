@@ -6,6 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 	"sync"
@@ -134,6 +135,8 @@ func NewServer(opts ...Option) Server {
 	srv := &server{opts: options}
 
 	var unaryInterceptors []grpc.UnaryServerInterceptor
+
+	unaryInterceptors = append(unaryInterceptors, otelgrpc.UnaryServerInterceptor())
 
 	unaryInterceptors = append(unaryInterceptors, interceptor.UnaryServerMetadata())
 	logger.Debugf("gRPC server '%s': metadata interceptor enabled", srv.opts.Name)

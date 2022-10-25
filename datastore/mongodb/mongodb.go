@@ -5,6 +5,7 @@ import (
 	"github.com/marcoEgger/genki/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 	"time"
 )
 
@@ -14,10 +15,12 @@ type MongoDB struct {
 }
 
 // New will connect to the MongoDB server using the given URI
+//
+//goland:noinspection GoUnusedExportedFunction
 func New(uri string) (*MongoDB, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	db, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	db, err := mongo.Connect(ctx, options.Client().SetMonitor(otelmongo.NewMonitor()).ApplyURI(uri))
 	if err != nil {
 		return nil, err
 	}

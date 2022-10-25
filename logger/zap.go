@@ -2,6 +2,7 @@ package logger
 
 import (
 	"context"
+	"github.com/uptrace/opentelemetry-go-extra/otelzap"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -10,7 +11,7 @@ import (
 )
 
 type zapLogger struct {
-	sugared *zap.SugaredLogger
+	sugared *otelzap.SugaredLogger
 }
 
 func newZapLogger(level string, callerskip int) (Logger, error) {
@@ -49,8 +50,10 @@ func newZapLogger(level string, callerskip int) (Logger, error) {
 	// skip the two newest calls in the call-stack, they are from this logging package and of no use.
 	logger = logger.WithOptions(zap.AddCallerSkip(callerskip))
 
+	tracedLogger := otelzap.New(logger)
+
 	return &zapLogger{
-		sugared: logger.Sugar(),
+		sugared: tracedLogger.Sugar(),
 	}, nil
 }
 
