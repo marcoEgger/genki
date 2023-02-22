@@ -1,6 +1,6 @@
 module github.com/marcoEgger/genki
 
-go 1.19
+go 1.20
 
 require (
 	github.com/etherlabsio/healthcheck v0.0.0-20191224061800-dd3d2fd8c3f6
