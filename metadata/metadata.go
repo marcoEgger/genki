@@ -24,16 +24,29 @@ func NewContext(ctx context.Context, md Metadata) context.Context {
 	return context.WithValue(ctx, key{}, md)
 }
 
+func NewInternalContext(ctx context.Context) context.Context {
+	meta, _ := FromContext(ctx)
+	newMeta := make(Metadata)
+	for k, v := range meta {
+		if k == InternalKey {
+			newMeta[k] = "true"
+		} else {
+			newMeta[k] = v
+		}
+	}
+	return NewContext(ctx, newMeta)
+}
+
 func NewOutgoingContext(ctx context.Context) context.Context {
 	md := metadata.MD{}
 
 	ctxMeta, ok := FromContext(ctx)
 	if ok {
-		for key, value := range ctxMeta {
-			if key == EmailKey || key == FirstNameKey || key == LastNameKey {
-				md.Set(key, base64.StdEncoding.EncodeToString([]byte(value)))
+		for k, v := range ctxMeta {
+			if k == EmailKey || k == FirstNameKey || k == LastNameKey {
+				md.Set(k, base64.StdEncoding.EncodeToString([]byte(v)))
 			} else {
-				md.Set(key, value)
+				md.Set(k, v)
 			}
 		}
 	}
