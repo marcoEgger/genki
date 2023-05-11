@@ -27,12 +27,17 @@ func NewContext(ctx context.Context, md Metadata) context.Context {
 func NewInternalContext(ctx context.Context) context.Context {
 	meta, _ := FromContext(ctx)
 	newMeta := make(Metadata)
+	replaced := false
 	for k, v := range meta {
 		if k == InternalKey {
 			newMeta[k] = "true"
+			replaced = true
 		} else {
 			newMeta[k] = v
 		}
+	}
+	if !replaced {
+		newMeta[InternalKey] = "true"
 	}
 	return NewContext(ctx, newMeta)
 }
