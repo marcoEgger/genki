@@ -20,23 +20,23 @@
 // use the splunksql.Open function as a replacement for any sql.Open function
 // use. For example, if your code looks like this to start.
 //
-//     import (
-//     	"database/sql"
-//     	_ "github.com/go-sql-driver/mysql"
-//     )
-//     // ...
-//     db, err := sql.Open("mysql", "user:password@/dbname")
-//     // ...
+//	import (
+//		"database/sql"
+//		_ "github.com/go-sql-driver/mysql"
+//	)
+//	// ...
+//	db, err := sql.Open("mysql", "user:password@/dbname")
+//	// ...
 //
 // Update to this.
 //
-//     import (
-//     	_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
-//     	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
-//     )
-//     // ...
-//     db, err := splunksql.Open("mysql", "user:password@/dbname")
-//     // ...
+//	import (
+//		_ "github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql"
+//		"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
+//	)
+//	// ...
+//	db, err := splunksql.Open("mysql", "user:password@/dbname")
+//	// ...
 package splunkmysql
 
 import (
@@ -49,7 +49,7 @@ import (
 	"github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 )
 
-func init() { // nolint: gochecknoinits
+func init() { //nolint: gochecknoinits // register db driver
 	splunksql.Register("mysql", splunksql.InstrumentationConfig{
 		DBSystem:  splunksql.DBSystemMySQL,
 		DSNParser: DSNParser,
@@ -75,19 +75,27 @@ func DSNParser(dataSourceName string) (splunksql.ConnectionConfig, error) {
 	connCfg.User = cfg.User
 
 	if cfg.Net != "" {
-		// These are the only two cases the instrumented package knows about.
-		switch cfg.Net {
-		case "unix":
-			connCfg.NetTransport = splunksql.NetTransportUnix
-		case "tcp":
-			connCfg.NetTransport = splunksql.NetTransportTCP
-		}
-
 		host, port, err := net.SplitHostPort(cfg.Addr)
 		if err == nil {
 			connCfg.Host = host
 			if p, err := strconv.Atoi(port); err == nil {
 				connCfg.Port = p
+			}
+		}
+
+		// These are the only two cases the instrumented package knows about.
+		switch cfg.Net {
+		case "unix":
+			connCfg.NetTransport = splunksql.NetTransportPipe
+			connCfg.NetSockFamily = splunksql.NetSockFamilyUnix
+		case "tcp":
+			connCfg.NetTransport = splunksql.NetTransportTCP
+			if ip := net.ParseIP(connCfg.Host); ip != nil {
+				if ip.To4() != nil {
+					connCfg.NetSockFamily = splunksql.NetSockFamilyInet
+				} else {
+					connCfg.NetSockFamily = splunksql.NetSockFamilyInet6
+				}
 			}
 		}
 	}

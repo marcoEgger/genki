@@ -8,6 +8,71 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [1.3.1] - 2023-02-08
+
+This upgrades [OpenTelemetry Go to v1.13.0/v0.36.0][otel-v1.13.0] and
+[OpenTelemetry Go Contrib to v1.14.0/v0.39.0/v0.8.0][contrib-v1.14.0].
+
+## [1.3.0] - 2023-02-01
+
+This upgrades [OpenTelemetry Go to v1.12.0/v0.35.0][otel-v1.12.0] and
+[OpenTelemetry Go Contrib to v1.13.0/v0.38.0/v0.7.0][contrib-v1.13.0].
+
+### Fixed
+
+- The goroutine created by the `Open` function in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
+  is no longer orphaned. (#1682)
+
+### Added
+
+- The `NetSockFamily` type and related variables to be use in the
+  `ConnectionConfig` from
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  (#1749)
+
+### Changed
+
+- Add the `NetSockFamily` field to the `ConnectionConfig` in
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`.
+  This is used to define the protocol address family used for communication with
+  the database. (#1749)
+- Update `go.opentelemetry.io/otel/semconv` to `v1.17.0` in the following
+  packages. (#1749)
+  - `github.com/signalfx/splunk-otel-go/distro`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/confluentinc/confluent-kafka-go/kafka/splunkkafka`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-chi/chi/splunkchi`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/gomodule/redigo/splunkredigo`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/jackc/pgx/splunkpgx`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/syndtr/goleveldb/leveldb/splunkleveldb`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/github.com/tidwall/buntdb/splunkbuntdb`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/gopkg.in/olivere/elastic/splunkelastic`
+  - `github.com/signalfx/splunk-otel-go/instrumentation/k8s.io/client-go/splunkclient-go`
+
+### Deprecated
+
+- The `NetTransportIP` and `NetTransportUnix` variables from
+  `github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql`
+  are deprecated as they are no longer available in `go.opentelemetry.io/otel/semconv/v1.17.0`.
+  Use an appropriate `NetSockFamily*` variable instead. (#1749)
+
+## [1.2.0] - 2023-01-11
+
+This upgrades [OpenTelemetry Go to v1.11.2/v0.34.0][otel-v1.11.2] and
+[OpenTelemetry Go Contrib to v1.12.0/v0.37.0/v0.6.0][contrib-v1.12.0].
+
+### Added
+
+- `OTEL_LOG_LEVEL` environment variable accepts case insensitive values. (#1374)
+
+### Removed
+
+- Drop support for Go 1.17 as `go.opentelemetry.io` did the same in
+  [`v1.11.0`][otel-v1.11.0]. (#1570)
+
 ## [1.1.0] - 2022-07-14
 
 This release uses [OpenTelemetry Go v1.8.0][otel-v1.8.0] and
@@ -313,7 +378,10 @@ an impedance mismatch with this duplicate batching.
 - Add [`splunkhttp`](./instrumentation/net/http/splunkhttp) module providing
   additional Splunk specific instrumentation for `net/http`.
 
-[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/signalfx/splunk-otel-go/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.3.1
+[1.3.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.3.0
+[1.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.2.0
 [1.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.1.0
 [1.0.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v1.0.0
 [0.9.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.9.0
@@ -325,10 +393,13 @@ an impedance mismatch with this duplicate batching.
 [0.2.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.2.0
 [0.1.0]: https://github.com/signalfx/splunk-otel-go/releases/tag/v0.1.0
 
+[otel-v1.13.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.13.0
+[otel-v1.12.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.12.0
+[otel-v1.11.2]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.11.2
+[otel-v1.11.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.11.0
 [otel-v1.8.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.8.0
 [otel-v1.7.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.7.0
 [otel-v1.6.1]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.1
-[otel-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.6.0
 [otel-v1.3.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.3.0
 [otel-v1.0.0-RC3]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.0.0-RC3
 [otel-v1.0.0-RC2]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v1.0.0-RC2
@@ -336,6 +407,9 @@ an impedance mismatch with this duplicate batching.
 [otel-v0.20.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.20.0
 [otel-v0.19.0]: https://github.com/open-telemetry/opentelemetry-go/releases/tag/v0.19.0
 
+[contrib-v1.14.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.14.0
+[contrib-v1.13.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.13.0
+[contrib-v1.12.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.12.0
 [contrib-v1.8.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.8.0
 [contrib-v1.7.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.7.0
 [contrib-v1.6.0]: https://github.com/open-telemetry/opentelemetry-go-contrib/releases/tag/v1.6.0

@@ -8,7 +8,7 @@
 [![Keep a Changelog](https://img.shields.io/badge/changelog-Keep%20a%20Changelog-%23E05735)](CHANGELOG.md)
 [![LICENSE](https://img.shields.io/github/license/signalfx/splunk-otel-go)](LICENSE)
 
-[![Build Status](https://img.shields.io/github/workflow/status/signalfx/splunk-otel-go/ci)](https://github.com/signalfx/splunk-otel-go/actions?query=branch%3Amain)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/signalfx/splunk-otel-go/ci.yml?branch=main)](https://github.com/signalfx/splunk-otel-go/actions?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/signalfx/splunk-otel-go/branch/main/graph/badge.svg)](https://codecov.io/gh/signalfx/splunk-otel-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/signalfx/splunk-otel-go)](https://goreportcard.com/report/github.com/signalfx/splunk-otel-go)
 
@@ -19,17 +19,16 @@ application to capture and report distributed traces to Splunk APM.
 
 ## Documentation
 
-Read the official documentation for this distribution in the
-[Splunk Docs site](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html).
-
 ### Getting Started
 
-Explore how to get started with the project [here](./docs/README.md#getting-started).
+Read the official documentation for this distribution in the
+[Splunk Docs site](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/get-started.html).
 
 ### Troubleshooting
 
 For troubleshooting information, see the
-[Troubleshooting](./docs/troubleshooting.md) documentation.
+[Troubleshooting](https://docs.splunk.com/Observability/gdi/get-data-in/application/go/troubleshooting/common-go-troubleshooting.html)
+documentation.
 
 ## Examples
 
@@ -47,10 +46,9 @@ before creating an issue or a pull request.
 ## License
 
 The Splunk distribution of OpenTelemetry Go is a
-distribution of the [OpenTelemetry Go
-project](https://github.com/open-telemetry/opentelemetry-go). It is
-released under the terms of the Apache Software License version 2.0. See [the
-license file](./LICENSE) for more details.
+distribution of [OpenTelemetry Go](https://github.com/open-telemetry/opentelemetry-go).
+It is licensed under the terms of the Apache Software License version 2.0.
+See [the license file](./LICENSE) for more details.
 
 >ℹ️&nbsp;&nbsp;SignalFx was acquired by Splunk in October 2019. See [Splunk
 SignalFx](https://www.splunk.com/en_us/investor-relations/acquisitions/signalfx.html)
