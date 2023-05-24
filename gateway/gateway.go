@@ -2,9 +2,10 @@ package gateway
 
 import (
 	"context"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 
 	"github.com/marcoEgger/genki/server/grpc/interceptor"
@@ -55,7 +56,14 @@ func NewGateway(ctx context.Context, options ...Option) Gateway {
 	}
 
 	// register default marshaller
-	serveMuxOpts = append(serveMuxOpts, runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}))
+	serveMuxOpts = append(serveMuxOpts, runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+		MarshalOptions: protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		},
+		UnmarshalOptions: protojson.UnmarshalOptions{
+			DiscardUnknown: true,
+		},
+	}))
 
 	mux := runtime.NewServeMux(serveMuxOpts...)
 

@@ -3,7 +3,7 @@ package gateway
 import (
 	"strings"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	"github.com/marcoEgger/genki/server/grpc/interceptor"
 	"github.com/marcoEgger/genki/server/http/middleware"
