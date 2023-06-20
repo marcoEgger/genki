@@ -24,6 +24,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 
@@ -34,22 +35,25 @@ import (
 // instrumentationName is the instrumentation library identifier for a Tracer.
 const instrumentationName = "github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql"
 
-// traceConfig contains tracing configuration options.
-type traceConfig struct {
+// config contains configuration options.
+type config struct {
 	*internal.Config
 
-	DBName string
+	DBName           string
+	ConnectionString string
 }
 
-func newTraceConfig(options ...Option) traceConfig {
-	c := traceConfig{
-		Config: internal.NewConfig(instrumentationName, internal.OptionFunc(
-			func(c *internal.Config) {
-				c.DefaultStartOpts = []trace.SpanStartOption{
-					// From the specification: span kind MUST always be CLIENT.
-					trace.WithSpanKind(trace.SpanKindClient),
-				}
-			}),
+func newConfig(options ...Option) config {
+	c := config{
+		Config: internal.NewConfig(instrumentationName,
+			internal.OptionFunc(
+				func(c *internal.Config) {
+					c.Version = Version()
+					c.DefaultStartOpts = []trace.SpanStartOption{
+						// From the specification: span kind MUST always be CLIENT.
+						trace.WithSpanKind(trace.SpanKindClient),
+					}
+				}),
 		),
 	}
 
@@ -63,12 +67,12 @@ func newTraceConfig(options ...Option) traceConfig {
 }
 
 // withSpan wraps the function f with a span.
-func (c traceConfig) withSpan(ctx context.Context, m moniker.Span, f func(context.Context) error, opts ...trace.SpanStartOption) error {
+func (c config) withSpan(ctx context.Context, m moniker.Span, f func(context.Context) error, opts ...trace.SpanStartOption) error {
 	return c.WithSpan(ctx, c.spanName(m), f, opts...)
 }
 
 // spanName returns the OpenTelemetry compliant span name.
-func (c traceConfig) spanName(m moniker.Span) string {
+func (c config) spanName(m moniker.Span) string {
 	// From the OpenTelemetry semantic conventions
 	// (https://github.com/open-telemetry/opentelemetry-specification/blob/v1.6.1/specification/trace/semantic_conventions/database.md):
 	//
@@ -98,20 +102,20 @@ func (c traceConfig) spanName(m moniker.Span) string {
 
 // Option applies options to a tracing configuration.
 type Option interface {
-	apply(*traceConfig)
+	apply(*config)
 }
 
 type optionConv struct {
 	iOpt internal.Option
 }
 
-func (o optionConv) apply(c *traceConfig) {
+func (o optionConv) apply(c *config) {
 	o.iOpt.Apply(c.Config)
 }
 
-type optionFunc func(*traceConfig)
+type optionFunc func(*config)
 
-func (o optionFunc) apply(c *traceConfig) {
+func (o optionFunc) apply(c *config) {
 	o(c)
 }
 
@@ -119,6 +123,12 @@ func (o optionFunc) apply(c *traceConfig) {
 // this instrumentation library.
 func WithTracerProvider(tp trace.TracerProvider) Option {
 	return optionConv{iOpt: internal.WithTracerProvider(tp)}
+}
+
+// WithMeterProvider returns an Option that sets the MeterProvider used with
+// this instrumentation library.
+func WithMeterProvider(mp metric.MeterProvider) Option {
+	return optionConv{iOpt: internal.WithMeterProvider(mp)}
 }
 
 // WithAttributes returns an Option that appends attr to the attributes set
@@ -130,18 +140,22 @@ func WithAttributes(attr []attribute.KeyValue) Option {
 // withRegistrationConfig returns an Option that sets database attributes
 // required and recommended by the OpenTelemetry semantic conventions based on
 // the information instrumentation registered.
-func withRegistrationConfig(regCfg InstrumentationConfig, dsn string) Option {
-	var connCfg ConnectionConfig
+func withRegistrationConfig(driverName, dataSourceName string) Option {
+	regCfg := retrieve(driverName)
+
+	var (
+		connCfg ConnectionConfig
+		err     error
+	)
 	if regCfg.DSNParser != nil {
-		var err error
-		connCfg, err = regCfg.DSNParser(dsn)
+		connCfg, err = regCfg.DSNParser(dataSourceName)
 		if err != nil {
 			otel.Handle(err)
 		}
 	} else {
 		// Fallback. This is a best effort attempt if we do not know how to
 		// explicitly parse the DSN.
-		connCfg, _ = urlDSNParse(dsn)
+		connCfg, _ = urlDSNParse(dataSourceName)
 	}
 
 	attrs, err := connCfg.Attributes()
@@ -150,8 +164,9 @@ func withRegistrationConfig(regCfg InstrumentationConfig, dsn string) Option {
 	}
 	attrs = append(attrs, regCfg.DBSystem.Attribute())
 
-	return optionFunc(func(c *traceConfig) {
+	return optionFunc(func(c *config) {
 		c.DBName = connCfg.Name
+		c.ConnectionString = connCfg.ConnectionString
 		c.DefaultStartOpts = append(c.DefaultStartOpts, trace.WithAttributes(attrs...))
 	})
 }

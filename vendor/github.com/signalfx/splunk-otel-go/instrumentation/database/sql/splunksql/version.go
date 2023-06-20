@@ -12,13 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-Package splunkotel provides version information for the Splunk distribution of
-OpenTelemetry Go.
-*/
-package splunkotel // import "github.com/signalfx/splunk-otel-go"
+package splunksql
 
-// Version is the current release version of splunk-otel-go in use.
+// Version returns the version of splunksql.
 func Version() string {
-	return "1.3.1"
+	return "1.6.0"
 }

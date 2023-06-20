@@ -16,11 +16,9 @@ package internal
 
 import (
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/propagation"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
-
-	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
 // Option applies options to a configuration.
@@ -40,11 +38,15 @@ func (o OptionFunc) Apply(c *Config) {
 // a configuration.
 func WithTracerProvider(tp trace.TracerProvider) Option {
 	return OptionFunc(func(c *Config) {
-		c.Tracer = tp.Tracer(
-			c.instName,
-			trace.WithInstrumentationVersion(splunkotel.Version()),
-			trace.WithSchemaURL(semconv.SchemaURL),
-		)
+		c.Tracer = c.tracer(tp)
+	})
+}
+
+// WithMeterProvider returns an Option that sets the MeterProvider used for
+// a configuration.
+func WithMeterProvider(mp metric.MeterProvider) Option {
+	return OptionFunc(func(c *Config) {
+		c.Meter = c.meter(mp)
 	})
 }
 

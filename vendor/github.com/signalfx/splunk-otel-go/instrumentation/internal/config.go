@@ -19,20 +19,24 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
-
-	splunkotel "github.com/signalfx/splunk-otel-go"
 )
 
 // Config contains configuration options.
 type Config struct {
 	// instName is the name of the instrumentation this Config is used for.
 	instName string
+	// Version is the version of the instrumentation this Config is used for.
+	// It has to be set before user-provided options are applied.
+	Version string
 
-	Tracer           trace.Tracer
-	Propagator       propagation.TextMapPropagator
+	Tracer     trace.Tracer
+	Meter      metric.Meter
+	Propagator propagation.TextMapPropagator
+
 	DefaultStartOpts []trace.SpanStartOption
 }
 
@@ -50,11 +54,10 @@ func NewConfig(instrumentationName string, options ...Option) *Config {
 	}
 
 	if c.Tracer == nil {
-		c.Tracer = otel.Tracer(
-			c.instName,
-			trace.WithInstrumentationVersion(splunkotel.Version()),
-			trace.WithSchemaURL(semconv.SchemaURL),
-		)
+		c.Tracer = c.tracer(otel.GetTracerProvider())
+	}
+	if c.Meter == nil {
+		c.Meter = c.meter(otel.GetMeterProvider())
 	}
 
 	if c.Propagator == nil {
@@ -69,6 +72,7 @@ func (c *Config) Copy() *Config {
 	newC := Config{
 		instName:         c.instName,
 		Tracer:           c.Tracer,
+		Meter:            c.Meter,
 		Propagator:       c.Propagator,
 		DefaultStartOpts: make([]trace.SpanStartOption, len(c.DefaultStartOpts)),
 	}
@@ -86,13 +90,15 @@ func (c *Config) Copy() *Config {
 // from c is used.
 func (c *Config) ResolveTracer(ctx context.Context) trace.Tracer {
 	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
-		return span.TracerProvider().Tracer(
-			c.instName,
-			trace.WithInstrumentationVersion(splunkotel.Version()),
-			trace.WithSchemaURL(semconv.SchemaURL),
-		)
+		return c.tracer(span.TracerProvider())
 	}
 	return c.Tracer
+}
+
+// ResolveMeter returns an OpenTelemetry meter from the appropriate
+// MeterProvider.
+func (c *Config) ResolveMeter() metric.Meter {
+	return c.Meter
 }
 
 // MergedSpanStartOptions returns a copy of opts with any DefaultStartOpts
@@ -125,4 +131,22 @@ func (c *Config) WithSpan(ctx context.Context, name string, f func(context.Conte
 	span.End()
 
 	return err
+}
+
+// tracer creates a tracer using the passed TracerProvider.
+func (c *Config) tracer(tp trace.TracerProvider) trace.Tracer {
+	opts := []trace.TracerOption{trace.WithSchemaURL(semconv.SchemaURL)}
+	if c.Version != "" {
+		opts = append(opts, trace.WithInstrumentationVersion(c.Version))
+	}
+	return tp.Tracer(c.instName, opts...)
+}
+
+// meter creates a meter using the passed MeterProvider.
+func (c *Config) meter(mp metric.MeterProvider) metric.Meter {
+	opts := []metric.MeterOption{metric.WithSchemaURL(semconv.SchemaURL)}
+	if c.Version != "" {
+		opts = append(opts, metric.WithInstrumentationVersion(c.Version))
+	}
+	return mp.Meter(c.instName, opts...)
 }
