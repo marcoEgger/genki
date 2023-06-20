@@ -153,6 +153,8 @@ func (c *Connection) changeConnection(connection *amqp.Connection) {
 	c.connMutex.Lock()
 	defer c.connMutex.Unlock()
 
+	connection.Config.Heartbeat = 0
+
 	c.conn = connection
 	c.notifyCloseConnection = make(chan *amqp.Error)
 	c.conn.NotifyClose(c.notifyCloseConnection)
