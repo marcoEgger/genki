@@ -93,7 +93,9 @@ func (c *Connection) Shutdown() {
 // dial and return the connection and any occurred error
 func (c *Connection) dial() error {
 	c.setConnected(false)
-	conn, err := amqp.Dial(c.addr)
+	conn, err := amqp.DialConfig(c.addr, amqp.Config{
+		Heartbeat: 0,
+	})
 	if err != nil {
 		return err
 	}
@@ -152,8 +154,6 @@ func (c *Connection) reconnect() {
 func (c *Connection) changeConnection(connection *amqp.Connection) {
 	c.connMutex.Lock()
 	defer c.connMutex.Unlock()
-
-	connection.Config.Heartbeat = 0
 
 	c.conn = connection
 	c.notifyCloseConnection = make(chan *amqp.Error)
