@@ -2,7 +2,7 @@ package logger
 
 import (
 	"context"
-	"github.com/uptrace/opentelemetry-go-extra/otelzap"
+	"go.opentelemetry.io/otel/trace"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -11,7 +11,7 @@ import (
 )
 
 type zapLogger struct {
-	sugared *otelzap.SugaredLogger
+	sugared *zap.SugaredLogger
 }
 
 func newZapLogger(level string, callerskip int) (Logger, error) {
@@ -50,10 +50,8 @@ func newZapLogger(level string, callerskip int) (Logger, error) {
 	// skip the two newest calls in the call-stack, they are from this logging package and of no use.
 	logger = logger.WithOptions(zap.AddCallerSkip(callerskip))
 
-	tracedLogger := otelzap.New(logger)
-
 	return &zapLogger{
-		sugared: tracedLogger.Sugar(),
+		sugared: logger.Sugar(),
 	}, nil
 }
 
@@ -110,6 +108,11 @@ func (l *zapLogger) WithFields(keyValues Fields) Logger {
 
 func (l *zapLogger) WithMetadata(ctx context.Context) Logger {
 	fields := make(Fields)
+
+	spanCtx := trace.SpanContextFromContext(ctx)
+	fields["trace_id"] = spanCtx.TraceID().String()
+	fields["span_id"] = spanCtx.SpanID().String()
+
 	fields["meta."+metadata.RequestIDKey] = metadata.GetFromContext(ctx, metadata.RequestIDKey)
 	fields["meta."+metadata.M2MKey] = metadata.GetFromContext(ctx, metadata.M2MKey)
 	fields["meta."+metadata.AccountIDsKey] = metadata.GetFromContext(ctx, metadata.AccountIDsKey)

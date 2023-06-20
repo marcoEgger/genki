@@ -322,10 +322,6 @@ github.com/subosito/gotenv v1.4.2 h1:X1TuBLAMDFbaTAChgCBLu3DU3UPyELpnF2jjJ2cz/S8
 github.com/subosito/gotenv v1.4.2/go.mod h1:ayKnFf/c6rvx/2iiLrJUk1e6plDbT3edrFNGqEflhK0=
 github.com/tidwall/pretty v1.0.0 h1:HsD+QiTn7sK6flMKIvNmpqz1qrpP3Ps6jOKIKMooyg4=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
-github.com/uptrace/opentelemetry-go-extra/otelutil v0.2.1 h1:qjljyY//UH064+gQDHh5U7M1Jh6b+iQpJUWVAuRJ04A=
-github.com/uptrace/opentelemetry-go-extra/otelutil v0.2.1/go.mod h1:7YSrHCmYPHIXjTWnKSU7EGT0TFEcm3WwSeQquwCGg38=
-github.com/uptrace/opentelemetry-go-extra/otelzap v0.2.1 h1:HhKd/kmL1JuBK3zPr3gT/Ku7lvvBsnsy8NtQ+uG5rRM=
-github.com/uptrace/opentelemetry-go-extra/otelzap v0.2.1/go.mod h1:GiIWZ+UVlFnAik/QCTc7TjsLA+YV1m94ls3G1Q7fKRY=
 github.com/vmihailenco/go-tinylfu v0.2.2 h1:H1eiG6HM36iniK6+21n9LLpzx1G9R3DJa2UjUjbynsI=
 github.com/vmihailenco/go-tinylfu v0.2.2/go.mod h1:CutYi2Q9puTxfcolkliPq4npPuofg9N9t8JVrjzwa3Q=
 github.com/vmihailenco/msgpack/v5 v5.3.4/go.mod h1:7xyJ9e+0+9SaZT0Wt1RGleJXzli6Q/V5KbhBonMG9jc=

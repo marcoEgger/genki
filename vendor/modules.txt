@@ -210,12 +210,6 @@ github.com/spf13/viper/internal/encoding/yaml
 # github.com/subosito/gotenv v1.4.2
 ## explicit; go 1.18
 github.com/subosito/gotenv
-# github.com/uptrace/opentelemetry-go-extra/otelutil v0.2.1
-## explicit; go 1.18
-github.com/uptrace/opentelemetry-go-extra/otelutil
-# github.com/uptrace/opentelemetry-go-extra/otelzap v0.2.1
-## explicit; go 1.18
-github.com/uptrace/opentelemetry-go-extra/otelzap
 # github.com/vmihailenco/go-tinylfu v0.2.2
 ## explicit; go 1.15
 github.com/vmihailenco/go-tinylfu
@@ -299,7 +293,6 @@ go.opentelemetry.io/otel/internal/baggage
 go.opentelemetry.io/otel/internal/global
 go.opentelemetry.io/otel/propagation
 go.opentelemetry.io/otel/semconv/internal
-go.opentelemetry.io/otel/semconv/v1.10.0
 go.opentelemetry.io/otel/semconv/v1.12.0
 go.opentelemetry.io/otel/semconv/v1.17.0
 go.opentelemetry.io/otel/semconv/v1.7.0
