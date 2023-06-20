@@ -6,7 +6,7 @@ import (
 	"github.com/marcoEgger/genki/metadata"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 
 	"github.com/marcoEgger/genki/broker"
 	"github.com/marcoEgger/genki/broker/amqp/interceptor"

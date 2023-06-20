@@ -17,12 +17,12 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.16.0
+	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/rs/xid v1.5.0
 	github.com/signalfx/splunk-otel-go/instrumentation/database/sql/splunksql v1.6.0
 	github.com/signalfx/splunk-otel-go/instrumentation/github.com/go-sql-driver/mysql/splunkmysql v1.6.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.16.0
-	github.com/streadway/amqp v1.1.0
 	github.com/uptrace/opentelemetry-go-extra/otelzap v0.2.1
 	go.mongodb.org/mongo-driver v1.11.7
 	go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.42.0
