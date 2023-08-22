@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/marcoEgger/genki/metadata"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -57,20 +58,10 @@ func (evt *Event) Ack() {
 }
 
 func (evt *Event) Nack(requeue bool) {
-	req := "0"
-	if requeue {
-		req = "1"
-	}
-
-	interceptor.NackCounter.With(prometheus.Labels{
-		"routing_key": evt.routingKey,
-		"requeue":     req,
-	}).Inc()
-
-	_ = evt.delivery.Nack(false, requeue)
+	evt.NackWithTimeout(requeue, 5000)
 }
 
-func (evt *Event) Reject(requeue bool) {
+func (evt *Event) NackWithTimeout(requeue bool, timeoutInMs int64) {
 	req := "0"
 	if requeue {
 		req = "1"
@@ -81,7 +72,8 @@ func (evt *Event) Reject(requeue bool) {
 		"requeue":     req,
 	}).Inc()
 
-	_ = evt.delivery.Reject(requeue)
+	time.Sleep(time.Duration(timeoutInMs) * time.Millisecond)
+	_ = evt.delivery.Nack(false, requeue)
 }
 
 func (evt *Event) QueueName() string {
