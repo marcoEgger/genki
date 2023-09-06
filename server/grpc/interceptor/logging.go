@@ -49,7 +49,7 @@ func UnaryClientLogging() grpc.UnaryClientInterceptor {
 		log := logger.WithMetadata(ctx)
 		log.Infof("client call '%s' to server '%s'", method, cc.Target())
 		defer func(started time.Time) {
-			log = logger.WithFields(logger.Fields{
+			log = log.WithFields(logger.Fields{
 				"took": time.Since(started),
 			})
 			if err != nil {
