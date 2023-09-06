@@ -145,12 +145,14 @@ func (b *Broker) Disconnect() error {
 }
 
 func (b *Broker) Publish(exchange, routingKey string, message *broker.Message) error {
+	// Inject B3 headers for propagation
+	headers := InjectAMQPHeaders(message.Context)
+	headers[RequestIDHeader] = metadata.GetFromContext(message.Context, metadata.RequestIDKey)
+	headers[AccountIDHeader] = metadata.GetFromContext(message.Context, metadata.AccountIDKey)
+	headers[UserIDHeader] = metadata.GetFromContext(message.Context, metadata.UserIDKey)
+
 	pub := amqp.Publishing{
-		Headers: amqp.Table{
-			RequestIDHeader: metadata.GetFromContext(message.Context, metadata.RequestIDKey),
-			AccountIDHeader: metadata.GetFromContext(message.Context, metadata.AccountIDKey),
-			UserIDHeader:    metadata.GetFromContext(message.Context, metadata.UserIDKey),
-		},
+		Headers:      headers,
 		ContentType:  "application/octet-stream",
 		DeliveryMode: 0,
 		Priority:     0,

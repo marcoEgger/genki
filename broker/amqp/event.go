@@ -32,7 +32,7 @@ func NewEvent(queue, routingKey string, delivery amqp.Delivery) *Event {
 	for k, v := range delivery.Headers {
 		md[k] = fmt.Sprint(v)
 	}
-	ctx := metadata.NewContext(context.Background(), md)
+	ctx := metadata.NewContext(ExtractAMQPHeaders(context.Background(), delivery.Headers), md)
 
 	return &Event{
 		delivery:   delivery,
