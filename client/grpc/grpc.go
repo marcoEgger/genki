@@ -60,10 +60,10 @@ func (c *Client) Connect() (err error) {
 		c.addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainUnaryInterceptor(
-			otelgrpc.UnaryClientInterceptor(),
 			interceptor.UnaryClientPrometheus(),
 			interceptor.UnaryClientMetadata(),
 			interceptor.UnaryClientLogging(),
+			otelgrpc.UnaryClientInterceptor(),
 		),
 	)
 	if err != nil {
