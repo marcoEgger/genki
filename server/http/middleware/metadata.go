@@ -97,21 +97,36 @@ func findUserID(r *http.Request, md *metadata.Metadata) {
 func findEmail(r *http.Request, md *metadata.Metadata) {
 	email := r.Header.Get(EmailHeaderName)
 	if email != "" {
-		(*md)[metadata.EmailKey] = base64.StdEncoding.EncodeToString([]byte(email))
+		decoded, err := base64.StdEncoding.DecodeString(email)
+		if err == nil {
+			(*md)[metadata.EmailKey] = string(decoded)
+		} else {
+			(*md)[metadata.EmailKey] = email
+		}
 	}
 }
 
 func findFirstName(r *http.Request, md *metadata.Metadata) {
 	firstName := r.Header.Get(FirstNameHeaderName)
 	if firstName != "" {
-		(*md)[metadata.FirstNameKey] = base64.StdEncoding.EncodeToString([]byte(firstName))
+		decoded, err := base64.StdEncoding.DecodeString(firstName)
+		if err == nil {
+			(*md)[metadata.FirstNameKey] = string(decoded)
+		} else {
+			(*md)[metadata.FirstNameKey] = firstName
+		}
 	}
 }
 
 func findLastName(r *http.Request, md *metadata.Metadata) {
 	lastName := r.Header.Get(LastNameHeaderName)
 	if lastName != "" {
-		(*md)[metadata.LastNameKey] = base64.StdEncoding.EncodeToString([]byte(lastName))
+		decoded, err := base64.StdEncoding.DecodeString(lastName)
+		if err == nil {
+			(*md)[metadata.LastNameKey] = string(decoded)
+		} else {
+			(*md)[metadata.LastNameKey] = lastName
+		}
 	}
 }
 
