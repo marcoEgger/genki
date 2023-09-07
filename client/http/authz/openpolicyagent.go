@@ -3,6 +3,7 @@ package authz
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -55,7 +56,12 @@ func (auth *opa) Authorize(ctx context.Context, resourceId, action interface{}, 
 		payload["roles"] = metadata.GetFromContext(ctx, metadata.RolesKey)
 		payload["type"] = metadata.GetFromContext(ctx, metadata.TypeKey)
 		payload["subType"] = metadata.GetFromContext(ctx, metadata.SubTypeKey)
-		payload["email"] = metadata.GetFromContext(ctx, metadata.EmailKey)
+		decodedEmail, err := base64.StdEncoding.DecodeString(metadata.GetFromContext(ctx, metadata.EmailKey))
+		if err == nil {
+			payload["email"] = string(decodedEmail)
+		} else {
+			payload["email"] = metadata.GetFromContext(ctx, metadata.EmailKey)
+		}
 	} else {
 		payload["roles"] = []string{"anonymous"}
 	}
