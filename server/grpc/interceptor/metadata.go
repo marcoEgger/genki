@@ -32,9 +32,9 @@ func UnaryServerMetadata() grpc.UnaryServerInterceptor {
 		findAccountIds(ctx, &meta)
 		findAccountId(ctx, &meta)
 		findUserId(ctx, &meta)
-		findEmail(ctx, &meta)
-		findFirstName(ctx, &meta)
-		findLastName(ctx, &meta)
+		findEmail(ctx, &meta, true)
+		findFirstName(ctx, &meta, true)
+		findLastName(ctx, &meta, true)
 		findType(ctx, &meta)
 		findSubType(ctx, &meta)
 		findRoles(ctx, &meta)
@@ -53,9 +53,9 @@ func UnaryClientMetadata() grpc.UnaryClientInterceptor {
 		findAccountIds(ctx, &meta)
 		findAccountId(ctx, &meta)
 		findUserId(ctx, &meta)
-		findEmail(ctx, &meta)
-		findFirstName(ctx, &meta)
-		findLastName(ctx, &meta)
+		findEmail(ctx, &meta, false)
+		findFirstName(ctx, &meta, false)
+		findLastName(ctx, &meta, false)
 		findType(ctx, &meta)
 		findSubType(ctx, &meta)
 		findRoles(ctx, &meta)
@@ -137,13 +137,21 @@ func findUserId(ctx context.Context, meta *md.Metadata) {
 	_ = setAppContextValue(ctx, meta, md.UserIDKey)
 }
 
-func findEmail(ctx context.Context, meta *md.Metadata) {
+func findEmail(ctx context.Context, meta *md.Metadata, decode bool) {
 	if header, ok := metadata.FromIncomingContext(ctx); ok {
 		email := header.Get(EmailMetadataKey)
 		if len(email) > 0 {
-			emailEncoded := base64.StdEncoding.EncodeToString([]byte(email[0]))
-			(*meta)[md.EmailKey] = emailEncoded
-			ctx = metadata.AppendToOutgoingContext(ctx, md.EmailKey, emailEncoded)
+			if decode {
+				emailDecoded, err := base64.StdEncoding.DecodeString(email[0])
+				if err == nil {
+					(*meta)[md.EmailKey] = string(emailDecoded)
+					ctx = metadata.AppendToOutgoingContext(ctx, md.EmailKey, string(emailDecoded))
+				}
+			} else {
+				emailEncoded := base64.StdEncoding.EncodeToString([]byte(email[0]))
+				(*meta)[md.EmailKey] = emailEncoded
+				ctx = metadata.AppendToOutgoingContext(ctx, md.EmailKey, emailEncoded)
+			}
 		}
 	}
 
@@ -151,26 +159,42 @@ func findEmail(ctx context.Context, meta *md.Metadata) {
 	_ = setAppContextValue(ctx, meta, md.EmailKey)
 }
 
-func findFirstName(ctx context.Context, meta *md.Metadata) {
+func findFirstName(ctx context.Context, meta *md.Metadata, decode bool) {
 	if header, ok := metadata.FromIncomingContext(ctx); ok {
 		firstName := header.Get(FirstNameMetadataKey)
 		if len(firstName) > 0 {
-			firstNameEncoded := base64.StdEncoding.EncodeToString([]byte(firstName[0]))
-			(*meta)[md.FirstNameKey] = firstNameEncoded
-			ctx = metadata.AppendToOutgoingContext(ctx, md.FirstNameKey, firstNameEncoded)
+			if decode {
+				firstNameDecoded, err := base64.StdEncoding.DecodeString(firstName[0])
+				if err == nil {
+					(*meta)[md.FirstNameKey] = string(firstNameDecoded)
+					ctx = metadata.AppendToOutgoingContext(ctx, md.FirstNameKey, string(firstNameDecoded))
+				}
+			} else {
+				firstNameEncoded := base64.StdEncoding.EncodeToString([]byte(firstName[0]))
+				(*meta)[md.FirstNameKey] = firstNameEncoded
+				ctx = metadata.AppendToOutgoingContext(ctx, md.FirstNameKey, firstNameEncoded)
+			}
 		}
 	}
 	// eventually the app context is filled with metadata
 	_ = setAppContextValue(ctx, meta, md.FirstNameKey)
 }
 
-func findLastName(ctx context.Context, meta *md.Metadata) {
+func findLastName(ctx context.Context, meta *md.Metadata, decode bool) {
 	if header, ok := metadata.FromIncomingContext(ctx); ok {
 		lastName := header.Get(LastNameMetadataKey)
 		if len(lastName) > 0 {
-			lastNameEncoded := base64.StdEncoding.EncodeToString([]byte(lastName[0]))
-			(*meta)[md.LastNameKey] = lastNameEncoded
-			ctx = metadata.AppendToOutgoingContext(ctx, md.LastNameKey, lastNameEncoded)
+			if decode {
+				lastNameDecoded, err := base64.StdEncoding.DecodeString(lastName[0])
+				if err == nil {
+					(*meta)[md.LastNameKey] = string(lastNameDecoded)
+					ctx = metadata.AppendToOutgoingContext(ctx, md.LastNameKey, string(lastNameDecoded))
+				}
+			} else {
+				lastNameEncoded := base64.StdEncoding.EncodeToString([]byte(lastName[0]))
+				(*meta)[md.LastNameKey] = lastNameEncoded
+				ctx = metadata.AppendToOutgoingContext(ctx, md.LastNameKey, lastNameEncoded)
+			}
 		}
 	}
 	// eventually the app context is filled with metadata
