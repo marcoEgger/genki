@@ -32,9 +32,9 @@ func UnaryServerMetadata() grpc.UnaryServerInterceptor {
 		findAccountIds(ctx, &meta)
 		findAccountId(ctx, &meta)
 		findUserId(ctx, &meta)
-		findEmail(ctx, &meta, true)
-		findFirstName(ctx, &meta, true)
-		findLastName(ctx, &meta, true)
+		findEmail(ctx, &meta, false)
+		findFirstName(ctx, &meta, false)
+		findLastName(ctx, &meta, false)
 		findType(ctx, &meta)
 		findSubType(ctx, &meta)
 		findRoles(ctx, &meta)
@@ -53,9 +53,9 @@ func UnaryClientMetadata() grpc.UnaryClientInterceptor {
 		findAccountIds(ctx, &meta)
 		findAccountId(ctx, &meta)
 		findUserId(ctx, &meta)
-		findEmail(ctx, &meta, false)
-		findFirstName(ctx, &meta, false)
-		findLastName(ctx, &meta, false)
+		findEmail(ctx, &meta, true)
+		findFirstName(ctx, &meta, true)
+		findLastName(ctx, &meta, true)
 		findType(ctx, &meta)
 		findSubType(ctx, &meta)
 		findRoles(ctx, &meta)
@@ -137,20 +137,17 @@ func findUserId(ctx context.Context, meta *md.Metadata) {
 	_ = setAppContextValue(ctx, meta, md.UserIDKey)
 }
 
-func findEmail(ctx context.Context, meta *md.Metadata, decode bool) {
+func findEmail(ctx context.Context, meta *md.Metadata, encode bool) {
 	if header, ok := metadata.FromIncomingContext(ctx); ok {
 		email := header.Get(EmailMetadataKey)
 		if len(email) > 0 {
-			if decode {
-				emailDecoded, err := base64.StdEncoding.DecodeString(email[0])
-				if err == nil {
-					(*meta)[md.EmailKey] = string(emailDecoded)
-					ctx = metadata.AppendToOutgoingContext(ctx, md.EmailKey, string(emailDecoded))
-				}
-			} else {
+			if encode {
 				emailEncoded := base64.StdEncoding.EncodeToString([]byte(email[0]))
 				(*meta)[md.EmailKey] = emailEncoded
 				ctx = metadata.AppendToOutgoingContext(ctx, md.EmailKey, emailEncoded)
+			} else {
+				(*meta)[md.EmailKey] = email[0]
+				ctx = metadata.AppendToOutgoingContext(ctx, md.EmailKey, email[0])
 			}
 		}
 	}
@@ -159,20 +156,17 @@ func findEmail(ctx context.Context, meta *md.Metadata, decode bool) {
 	_ = setAppContextValue(ctx, meta, md.EmailKey)
 }
 
-func findFirstName(ctx context.Context, meta *md.Metadata, decode bool) {
+func findFirstName(ctx context.Context, meta *md.Metadata, encode bool) {
 	if header, ok := metadata.FromIncomingContext(ctx); ok {
 		firstName := header.Get(FirstNameMetadataKey)
 		if len(firstName) > 0 {
-			if decode {
-				firstNameDecoded, err := base64.StdEncoding.DecodeString(firstName[0])
-				if err == nil {
-					(*meta)[md.FirstNameKey] = string(firstNameDecoded)
-					ctx = metadata.AppendToOutgoingContext(ctx, md.FirstNameKey, string(firstNameDecoded))
-				}
-			} else {
+			if encode {
 				firstNameEncoded := base64.StdEncoding.EncodeToString([]byte(firstName[0]))
 				(*meta)[md.FirstNameKey] = firstNameEncoded
 				ctx = metadata.AppendToOutgoingContext(ctx, md.FirstNameKey, firstNameEncoded)
+			} else {
+				(*meta)[md.FirstNameKey] = firstName[0]
+				ctx = metadata.AppendToOutgoingContext(ctx, md.FirstNameKey, firstName[0])
 			}
 		}
 	}
@@ -180,20 +174,17 @@ func findFirstName(ctx context.Context, meta *md.Metadata, decode bool) {
 	_ = setAppContextValue(ctx, meta, md.FirstNameKey)
 }
 
-func findLastName(ctx context.Context, meta *md.Metadata, decode bool) {
+func findLastName(ctx context.Context, meta *md.Metadata, encode bool) {
 	if header, ok := metadata.FromIncomingContext(ctx); ok {
 		lastName := header.Get(LastNameMetadataKey)
 		if len(lastName) > 0 {
-			if decode {
-				lastNameDecoded, err := base64.StdEncoding.DecodeString(lastName[0])
-				if err == nil {
-					(*meta)[md.LastNameKey] = string(lastNameDecoded)
-					ctx = metadata.AppendToOutgoingContext(ctx, md.LastNameKey, string(lastNameDecoded))
-				}
-			} else {
+			if encode {
 				lastNameEncoded := base64.StdEncoding.EncodeToString([]byte(lastName[0]))
 				(*meta)[md.LastNameKey] = lastNameEncoded
 				ctx = metadata.AppendToOutgoingContext(ctx, md.LastNameKey, lastNameEncoded)
+			} else {
+				(*meta)[md.LastNameKey] = lastName[0]
+				ctx = metadata.AppendToOutgoingContext(ctx, md.LastNameKey, lastName[0])
 			}
 		}
 	}
