@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"encoding/base64"
 	"net/http"
 
 	"github.com/marcoEgger/genki/metadata"
@@ -97,36 +96,21 @@ func findUserID(r *http.Request, md *metadata.Metadata) {
 func findEmail(r *http.Request, md *metadata.Metadata) {
 	email := r.Header.Get(EmailHeaderName)
 	if email != "" {
-		decoded, err := base64.StdEncoding.DecodeString(email)
-		if err == nil {
-			(*md)[metadata.EmailKey] = string(decoded)
-		} else {
-			(*md)[metadata.EmailKey] = email
-		}
+		(*md)[metadata.EmailKey] = email
 	}
 }
 
 func findFirstName(r *http.Request, md *metadata.Metadata) {
 	firstName := r.Header.Get(FirstNameHeaderName)
 	if firstName != "" {
-		decoded, err := base64.StdEncoding.DecodeString(firstName)
-		if err == nil {
-			(*md)[metadata.FirstNameKey] = string(decoded)
-		} else {
-			(*md)[metadata.FirstNameKey] = firstName
-		}
+		(*md)[metadata.FirstNameKey] = firstName
 	}
 }
 
 func findLastName(r *http.Request, md *metadata.Metadata) {
 	lastName := r.Header.Get(LastNameHeaderName)
 	if lastName != "" {
-		decoded, err := base64.StdEncoding.DecodeString(lastName)
-		if err == nil {
-			(*md)[metadata.LastNameKey] = string(decoded)
-		} else {
-			(*md)[metadata.LastNameKey] = lastName
-		}
+		(*md)[metadata.LastNameKey] = lastName
 	}
 }
 
