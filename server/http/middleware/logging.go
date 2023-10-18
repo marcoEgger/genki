@@ -29,8 +29,8 @@ func LoggingHandler(handler http.Handler, skipEndpoint ...string) http.Handler {
 				"took":   time.Since(started),
 				"status": sw.status,
 			})
-			if sw.status == 400 {
-				log.Errorf("served request to %s with error: %s", r.URL, sw.body.String())
+			if sw.status == 400 || sw.status == 500 {
+				log.Warnf("served request to %s with error: %s", r.URL, sw.body.String())
 			} else {
 				log.Infof("served request to %s", r.URL)
 			}

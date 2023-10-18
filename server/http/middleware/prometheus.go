@@ -32,7 +32,7 @@ func Prometheus(handler http.Handler, endpoint string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL
 		method := r.Method
-		sw := statusWriter{ResponseWriter: w}
+		sw := statusWriter{ResponseWriter: w, body: bytes.NewBufferString("")}
 
 		requestsCurrent.With(prometheus.Labels{
 			"method": method,
@@ -78,7 +78,7 @@ func (w *statusWriter) Write(b []byte) (int, error) {
 	n, err := w.ResponseWriter.Write(b)
 	w.length += n
 	// Also write error to own body to be able to print it
-	if w.status == 400 {
+	if w.status == 400 || w.status == 500 {
 		w.body.Write(b)
 	}
 	return n, err
