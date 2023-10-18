@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"context"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/protobuf/encoding/protojson"
 
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -23,6 +24,7 @@ var (
 		interceptor.UnaryClientLogging(),
 		interceptor.UnaryClientPrometheus(),
 		interceptor.UnaryClientMetadata(),
+		otelgrpc.UnaryClientInterceptor(),
 	}
 
 	dialOpts = []grpc.DialOption{
