@@ -1,11 +1,13 @@
 package middleware
 
 import (
+	"bytes"
 	"net/http"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
+
 var (
 	requestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
@@ -34,7 +36,7 @@ func Prometheus(handler http.Handler, endpoint string) http.Handler {
 
 		requestsCurrent.With(prometheus.Labels{
 			"method": method,
-			"path": path.String(),
+			"path":   path.String(),
 		}).Inc()
 
 		defer func(begin time.Time) {
@@ -42,14 +44,14 @@ func Prometheus(handler http.Handler, endpoint string) http.Handler {
 			duration := time.Since(begin)
 
 			requestDuration.With(prometheus.Labels{
-				"method": method,
-				"path": endpoint,
+				"method":      method,
+				"path":        endpoint,
 				"status_code": status,
 			}).Observe(float64(duration.Milliseconds()))
 
 			requestsCurrent.With(prometheus.Labels{
 				"method": method,
-				"path": endpoint,
+				"path":   endpoint,
 			}).Dec()
 		}(time.Now())
 
@@ -57,11 +59,11 @@ func Prometheus(handler http.Handler, endpoint string) http.Handler {
 	})
 }
 
-
 type statusWriter struct {
 	http.ResponseWriter
 	status int
 	length int
+	body   *bytes.Buffer
 }
 
 func (w *statusWriter) WriteHeader(status int) {
@@ -75,5 +77,9 @@ func (w *statusWriter) Write(b []byte) (int, error) {
 	}
 	n, err := w.ResponseWriter.Write(b)
 	w.length += n
+	// Also write error to own body to be able to print it
+	if w.status == 400 {
+		w.body.Write(b)
+	}
 	return n, err
 }

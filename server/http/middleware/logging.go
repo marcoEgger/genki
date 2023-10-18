@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"bytes"
 	"net/http"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 
 func LoggingHandler(handler http.Handler, skipEndpoint ...string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		sw := statusWriter{ResponseWriter: w}
+		sw := statusWriter{ResponseWriter: w, body: bytes.NewBufferString("")}
 
 		for _, skip := range skipEndpoint {
 			if r.URL.String() == skip {
@@ -18,8 +19,7 @@ func LoggingHandler(handler http.Handler, skipEndpoint ...string) http.Handler {
 			}
 		}
 
-		log := logger.WithMetadata(r.Context())
-		log = log.WithFields(logger.Fields{
+		log := logger.WithMetadata(r.Context()).WithFields(logger.Fields{
 			"req.method": r.Method,
 			"req.url":    r.URL,
 		})
@@ -29,9 +29,12 @@ func LoggingHandler(handler http.Handler, skipEndpoint ...string) http.Handler {
 				"took":   time.Since(started),
 				"status": sw.status,
 			})
-			log.Infof("served request to %s", r.URL)
+			if sw.status == 400 {
+				log.Errorf("served request to %s with error: %s", r.URL, sw.body.String())
+			} else {
+				log.Infof("served request to %s", r.URL)
+			}
 		}(time.Now())
 		handler.ServeHTTP(&sw, r)
 	})
 }
-
