@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"net/http"
 	"sync"
 
@@ -42,6 +43,8 @@ func (srv *server) Handle(endpoint string, handler http.Handler) {
 	}
 	handler = middleware.Metadata(handler)
 	logger.Debugf("HTTP server '%s': metadata middleware enabled for endpoint '%s'", srv.opts.Name, endpoint)
+	handler = otelhttp.NewHandler(handler, endpoint)
+	logger.Debugf("HTTP server '%s': tracing middleware enabled for endpoint '%s'", srv.opts.Name, endpoint)
 	srv.mux.Handle(endpoint, handler)
 }
 

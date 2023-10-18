@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package otel // import "go.opentelemetry.io/otel"
-
-// Version is the current release version of OpenTelemetry in use.
-func Version() string {
-	return "1.19.0"
-}
+// Package otelhttp provides an http.Handler and functions that are intended
+// to be used to add tracing by wrapping existing handlers (with Handler) and
+// routes WithRouteTag.
+package otelhttp // import "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
