@@ -112,6 +112,10 @@ func (v *validate) traverseField(ctx context.Context, parent reflect.Value, curr
 			return
 		}
 
+		if ct.typeof == typeOmitNil && (kind != reflect.Invalid && current.IsNil()) {
+			return
+		}
+
 		if ct.hasTag {
 			if kind == reflect.Invalid {
 				v.str1 = string(append(ns, cf.altName...))
@@ -162,6 +166,10 @@ func (v *validate) traverseField(ctx context.Context, parent reflect.Value, curr
 			}
 		}
 
+		if kind == reflect.Invalid {
+			return
+		}
+
 	case reflect.Struct:
 		isNestedStruct = !current.Type().ConvertibleTo(timeType)
 		// For backward compatibility before struct level validation tags were supported
@@ -169,7 +177,7 @@ func (v *validate) traverseField(ctx context.Context, parent reflect.Value, curr
 		// structs. Since it's basically nonsensical to use `required` with a non-pointer struct
 		// are explicitly skipping the required validation for it. This WILL be removed in the
 		// next major version.
-		if !v.v.requiredStructEnabled && ct != nil && ct.tag == requiredTag {
+		if isNestedStruct && !v.v.requiredStructEnabled && ct != nil && ct.tag == requiredTag {
 			ct = ct.next
 		}
 	}
@@ -224,6 +232,26 @@ OUTER:
 
 			if !hasValue(v) {
 				return
+			}
+
+			ct = ct.next
+			continue
+
+		case typeOmitNil:
+			v.slflParent = parent
+			v.flField = current
+			v.cf = cf
+			v.ct = ct
+
+			switch field := v.Field(); field.Kind() {
+			case reflect.Slice, reflect.Map, reflect.Ptr, reflect.Interface, reflect.Chan, reflect.Func:
+				if field.IsNil() {
+					return
+				}
+			default:
+				if v.fldIsPointer && field.Interface() == nil {
+					return
+				}
 			}
 
 			ct = ct.next
