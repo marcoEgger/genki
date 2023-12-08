@@ -27,7 +27,7 @@ func (cs *CustomSampler) Description() string {
 //goland:noinspection GoUnusedExportedFunction
 func InitTracing(service string, namespace string, url string) error {
 	// Create OTLP exporter
-	exporter, err := otlptracegrpc.New(context.Background(), otlptracegrpc.WithEndpoint(url))
+	exporter, err := otlptracegrpc.New(context.Background(), otlptracegrpc.WithEndpoint(url), otlptracegrpc.WithInsecure())
 	if err != nil {
 		return err
 	}
