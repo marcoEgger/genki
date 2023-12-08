@@ -1,9 +1,10 @@
 package tracing
 
 import (
+	"context"
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/semconv/v1.12.0"
@@ -25,8 +26,8 @@ func (cs *CustomSampler) Description() string {
 
 //goland:noinspection GoUnusedExportedFunction
 func InitTracing(service string, namespace string, url string) error {
-	// Create jaeger exporter
-	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
+	// Create OTLP exporter
+	exporter, err := otlptracegrpc.New(context.Background(), otlptracegrpc.WithEndpoint(url))
 	if err != nil {
 		return err
 	}
