@@ -150,6 +150,7 @@ func (b *Broker) Publish(exchange, routingKey string, message *broker.Message) e
 	headers[RequestIDHeader] = metadata.GetFromContext(message.Context, metadata.RequestIDKey)
 	headers[AccountIDHeader] = metadata.GetFromContext(message.Context, metadata.AccountIDKey)
 	headers[UserIDHeader] = metadata.GetFromContext(message.Context, metadata.UserIDKey)
+	headers[InternalHeader] = metadata.GetFromContext(message.Context, metadata.InternalKey)
 
 	pub := amqp.Publishing{
 		Headers:      headers,

@@ -17,6 +17,7 @@ const (
 	RequestIDHeader = "requestId"
 	AccountIDHeader = "accountId"
 	UserIDHeader    = "userId"
+	InternalHeader  = "internal"
 )
 
 type Event struct {
