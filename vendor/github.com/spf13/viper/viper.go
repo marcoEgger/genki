@@ -48,6 +48,7 @@ import (
 	"github.com/spf13/viper/internal/encoding/json"
 	"github.com/spf13/viper/internal/encoding/toml"
 	"github.com/spf13/viper/internal/encoding/yaml"
+	"github.com/spf13/viper/internal/features"
 )
 
 // ConfigMarshalError happens when failing to marshal the configuration.
@@ -623,7 +624,7 @@ func (v *Viper) AddRemoteProvider(provider, endpoint, path string) error {
 // To retrieve a config file called myapp.json from /configs/myapp.json
 // you should set path to /configs and set config name (SetConfigName()) to
 // "myapp".
-// Secure Remote Providers are implemented with github.com/bketelsen/crypt.
+// Secure Remote Providers are implemented with github.com/sagikazarmark/crypt.
 func AddSecureRemoteProvider(provider, endpoint, path, secretkeyring string) error {
 	return v.AddSecureRemoteProvider(provider, endpoint, path, secretkeyring)
 }
@@ -1114,14 +1115,20 @@ func Unmarshal(rawVal any, opts ...DecoderConfigOption) error {
 }
 
 func (v *Viper) Unmarshal(rawVal any, opts ...DecoderConfigOption) error {
-	// TODO: make this optional?
-	structKeys, err := v.decodeStructKeys(rawVal, opts...)
-	if err != nil {
-		return err
+	keys := v.AllKeys()
+
+	if features.BindStruct {
+		// TODO: make this optional?
+		structKeys, err := v.decodeStructKeys(rawVal, opts...)
+		if err != nil {
+			return err
+		}
+
+		keys = append(keys, structKeys...)
 	}
 
 	// TODO: struct keys should be enough?
-	return decode(v.getSettings(append(v.AllKeys(), structKeys...)), defaultDecoderConfig(rawVal, opts...))
+	return decode(v.getSettings(keys), defaultDecoderConfig(rawVal, opts...))
 }
 
 func (v *Viper) decodeStructKeys(input any, opts ...DecoderConfigOption) ([]string, error) {
@@ -1179,7 +1186,20 @@ func (v *Viper) UnmarshalExact(rawVal any, opts ...DecoderConfigOption) error {
 	config := defaultDecoderConfig(rawVal, opts...)
 	config.ErrorUnused = true
 
-	return decode(v.AllSettings(), config)
+	keys := v.AllKeys()
+
+	if features.BindStruct {
+		// TODO: make this optional?
+		structKeys, err := v.decodeStructKeys(rawVal, opts...)
+		if err != nil {
+			return err
+		}
+
+		keys = append(keys, structKeys...)
+	}
+
+	// TODO: struct keys should be enough?
+	return decode(v.getSettings(keys), config)
 }
 
 // BindPFlags binds a full flag set to the configuration, using each flag's long
@@ -1769,12 +1789,6 @@ func (v *Viper) writeConfig(filename string, force bool) error {
 	}
 
 	return f.Sync()
-}
-
-// Unmarshal a Reader into a map.
-// Should probably be an unexported function.
-func unmarshalReader(in io.Reader, c map[string]any) error {
-	return v.unmarshalReader(in, c)
 }
 
 func (v *Viper) unmarshalReader(in io.Reader, c map[string]any) error {
