@@ -17,14 +17,14 @@ func UnaryServerLogging() grpc.UnaryServerInterceptor {
 			log := logger.WithMetadata(ctx)
 			log.Infof("incoming unary request to '%s'", info.FullMethod)
 			defer func(started time.Time) {
-				log = logger.WithFields(logger.Fields{
+				log = log.WithFields(logger.Fields{
 					"took": time.Since(started),
 				})
 				if err != nil {
 					grpcStatus, hasGrpcStatus := status.FromError(err)
 
 					if hasGrpcStatus {
-						log := log.WithFields(logger.Fields{
+						log = log.WithFields(logger.Fields{
 							"method":  info.FullMethod,
 							"status":  grpcStatus.Code().String(),
 							"details": grpcStatus.Details(),
@@ -56,7 +56,7 @@ func UnaryClientLogging() grpc.UnaryClientInterceptor {
 				grpcStatus, hasGrpcStatus := status.FromError(err)
 
 				if hasGrpcStatus {
-					log := log.WithFields(logger.Fields{
+					log = log.WithFields(logger.Fields{
 						"method":  method,
 						"status":  grpcStatus.Code().String(),
 						"details": grpcStatus.Details(),
