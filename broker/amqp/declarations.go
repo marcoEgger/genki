@@ -39,14 +39,19 @@ type Queue struct {
 	args       amqp.Table
 }
 
-func AutoQueue(name string) Declaration {
+func AutoQueue(name string, enableQuorumQueues bool) Declaration {
+	args := amqp.Table{}
+	if enableQuorumQueues {
+		args["x-queue-type"] = "quorum"
+	}
+
 	return DeclareQueue(&Queue{
 		name:       name,
 		durable:    true,
 		autoDelete: false,
 		exclusive:  false,
 		noWait:     false,
-		args:       nil,
+		args:       args,
 	})
 }
 
