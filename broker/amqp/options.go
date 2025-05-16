@@ -11,10 +11,11 @@ import (
 const AddressConfigKey = "amqp-url"
 
 type Options struct {
-	Address         string
-	PrefetchCount   int
-	SubscriberQueue string
-	ConsumerName    string
+	Address            string
+	PrefetchCount      int
+	SubscriberQueue    string
+	ConsumerName       string
+	EnableQuorumQueues bool
 }
 
 func Address(address string) Option {
@@ -41,12 +42,19 @@ func ConsumerName(name string) Option {
 	}
 }
 
+func EnableQuorumQueue() Option {
+	return func(opts *Options) {
+		opts.EnableQuorumQueues = true
+	}
+}
+
 func newOptions(opts ...Option) *Options {
 	defaults := &Options{
-		Address:         "",
-		SubscriberQueue: "default-queue",
-		ConsumerName:    defaultConsumerName(),
-		PrefetchCount:   10,
+		Address:            "",
+		SubscriberQueue:    "default-queue",
+		ConsumerName:       defaultConsumerName(),
+		PrefetchCount:      10,
+		EnableQuorumQueues: false,
 	}
 
 	for _, o := range opts {

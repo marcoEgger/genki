@@ -103,7 +103,12 @@ func (b *Broker) Consume(wg *sync.WaitGroup) {
 			continue
 		}
 
-		deliveries, err := channel.Consume(b.opts.SubscriberQueue, b.opts.ConsumerName, false, false, false, false, nil)
+		args := amqp.Table{}
+		if b.opts.EnableQuorumQueues {
+			args["x-queue-type"] = "quorum"
+		}
+
+		deliveries, err := channel.Consume(b.opts.SubscriberQueue, b.opts.ConsumerName, false, false, false, false, args)
 		if err != nil {
 			logger.Error("amqp consumer error: %s", err)
 			time.Sleep(500 * time.Millisecond)
@@ -180,6 +185,7 @@ func (b *Broker) Publish(exchange, routingKey string, message *broker.Message) e
 func (b *Broker) Subscribe(exchange, routingKey string, handler broker.Handler) error {
 	b.consumerDecls = append(b.consumerDecls, AutoExchange(exchange))
 	b.consumerDecls = append(b.consumerDecls, AutoQueue(b.opts.SubscriberQueue))
+	b.consumerDecls = append(b.consumerDecls)
 	b.consumerDecls = append(b.consumerDecls, AutoBinding(routingKey, b.opts.SubscriberQueue, exchange))
 	b.subscriptions[routingKey] = handler
 	logger.Infof("subscribed to events with routing key '%s' from exchange '%s'", routingKey, exchange)
