@@ -24,11 +24,11 @@ var (
 		interceptor.UnaryClientLogging(),
 		interceptor.UnaryClientPrometheus(),
 		interceptor.UnaryClientMetadata(),
-		otelgrpc.UnaryClientInterceptor(),
 	}
 
 	dialOpts = []grpc.DialOption{
 		grpc.WithInsecure(),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	}
 )
 

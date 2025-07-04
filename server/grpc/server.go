@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/stats"
 	"net"
 	"sync"
 	"time"
@@ -140,13 +141,6 @@ func NewServer(opts ...Option) Server {
 
 	var unaryInterceptors []grpc.UnaryServerInterceptor
 
-	unaryInterceptors = append(unaryInterceptors, otelgrpc.UnaryServerInterceptor(otelgrpc.WithInterceptorFilter(func(info *otelgrpc.InterceptorInfo) bool {
-		if info.UnaryServerInfo != nil && info.UnaryServerInfo.FullMethod == "/grpc.health.v1.Health/Check" {
-			return false
-		}
-		return true
-	})))
-
 	unaryInterceptors = append(unaryInterceptors, interceptor.UnaryServerMetadata())
 	logger.Debugf("gRPC server '%s': metadata interceptor enabled", srv.opts.Name)
 
@@ -159,9 +153,17 @@ func NewServer(opts ...Option) Server {
 		unaryInterceptors = append(unaryInterceptors, interceptor.UnaryServerPrometheus())
 	}
 
-	srv.grpc = grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-		unaryInterceptors...,
-	)))
+	srv.grpc = grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler(otelgrpc.WithFilter(func(info *stats.RPCTagInfo) bool {
+			if info.FullMethodName == "/grpc.health.v1.Health/Check" {
+				return false // skip health check method for stats
+			}
+			return true // all other methods are instrumented
+		}))),
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			unaryInterceptors...,
+		)),
+	)
 
 	return srv
 }
