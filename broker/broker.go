@@ -43,4 +43,5 @@ type Event interface {
 	QueueName() string
 	RoutingKey() string
 	SetContext(ctx context.Context)
+	IsRedelivered() bool
 }

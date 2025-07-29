@@ -84,3 +84,7 @@ func (evt *Event) QueueName() string {
 func (evt *Event) RoutingKey() string {
 	return evt.routingKey
 }
+
+func (evt *Event) IsRedelivered() bool {
+	return evt.delivery.Redelivered
+}
