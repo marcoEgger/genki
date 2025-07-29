@@ -63,8 +63,8 @@ func (c *Client) Connect() (err error) {
 			interceptor.UnaryClientPrometheus(),
 			interceptor.UnaryClientMetadata(),
 			interceptor.UnaryClientLogging(),
-			otelgrpc.UnaryClientInterceptor(),
 		),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("gRPC client connection '%s' (%s) failed", c.name, c.addr))
