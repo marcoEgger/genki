@@ -55,6 +55,19 @@ func (s *BasicHealthChecker) Check(_ context.Context, req *grpc_health_v1.Health
 	}, nil
 }
 
+func (s *BasicHealthChecker) List(_ context.Context, _ *grpc_health_v1.HealthListRequest) (*grpc_health_v1.HealthListResponse, error) {
+	statuses := make(map[string]*grpc_health_v1.HealthCheckResponse)
+
+	// Add the service status - basic health checker always reports SERVING
+	statuses[s.opts.Name] = &grpc_health_v1.HealthCheckResponse{
+		Status: grpc_health_v1.HealthCheckResponse_SERVING,
+	}
+
+	return &grpc_health_v1.HealthListResponse{
+		Statuses: statuses,
+	}, nil
+}
+
 func (s *BasicHealthChecker) Watch(_ *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
 	return server.Send(&grpc_health_v1.HealthCheckResponse{
 		Status: grpc_health_v1.HealthCheckResponse_SERVING,
@@ -78,6 +91,27 @@ func (s *MySQLHealthChecker) Check(_ context.Context, req *grpc_health_v1.Health
 			Status: grpc_health_v1.HealthCheckResponse_NOT_SERVING,
 		}, nil
 	}
+}
+
+func (s *MySQLHealthChecker) List(_ context.Context, _ *grpc_health_v1.HealthListRequest) (*grpc_health_v1.HealthListResponse, error) {
+	statuses := make(map[string]*grpc_health_v1.HealthCheckResponse)
+
+	// Check MySQL connection status
+	var status grpc_health_v1.HealthCheckResponse_ServingStatus
+	if err := s.db.Ping(); err == nil {
+		status = grpc_health_v1.HealthCheckResponse_SERVING
+	} else {
+		logger.Errorf("MySQL not serving: %s", err)
+		status = grpc_health_v1.HealthCheckResponse_NOT_SERVING
+	}
+
+	statuses[s.opts.Name] = &grpc_health_v1.HealthCheckResponse{
+		Status: status,
+	}
+
+	return &grpc_health_v1.HealthListResponse{
+		Statuses: statuses,
+	}, nil
 }
 
 func (s *MySQLHealthChecker) Watch(_ *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
@@ -105,6 +139,26 @@ func (s *MongodbHealthChecker) Check(ctx context.Context, req *grpc_health_v1.He
 	}
 }
 
+func (s *MongodbHealthChecker) List(ctx context.Context, _ *grpc_health_v1.HealthListRequest) (*grpc_health_v1.HealthListResponse, error) {
+	statuses := make(map[string]*grpc_health_v1.HealthCheckResponse)
+
+	// Check MongoDB connection status
+	var status grpc_health_v1.HealthCheckResponse_ServingStatus
+	if err := s.db.Ping(ctx, readpref.Primary()); err == nil {
+		status = grpc_health_v1.HealthCheckResponse_SERVING
+	} else {
+		logger.Errorf("MongoDB not serving: %s", err)
+		status = grpc_health_v1.HealthCheckResponse_NOT_SERVING
+	}
+
+	statuses[s.opts.Name] = &grpc_health_v1.HealthCheckResponse{
+		Status: status,
+	}
+
+	return &grpc_health_v1.HealthListResponse{
+		Statuses: statuses,
+	}, nil
+}
 func (s *MongodbHealthChecker) Watch(_ *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) error {
 	return server.Send(&grpc_health_v1.HealthCheckResponse{
 		Status: grpc_health_v1.HealthCheckResponse_SERVING,
