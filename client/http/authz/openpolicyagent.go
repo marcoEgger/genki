@@ -48,8 +48,18 @@ func (auth *opa) Authorize(ctx context.Context, resourceId, action interface{}, 
 
 	if metadata.GetFromContext(ctx, metadata.M2MKey) == "true" {
 		payload["m2m"] = true
+		payload["user"] = metadata.GetFromContext(ctx, metadata.UserIDKey)
 		payload["accounts"] = strings.Split(metadata.GetFromContext(ctx, metadata.AccountIDsKey), ",")
+		payload["account"] = metadata.GetFromContext(ctx, metadata.AccountIDKey)
 		payload["roles"] = strings.Split(metadata.GetFromContext(ctx, metadata.RolesKey), ",")
+		payload["type"] = metadata.GetFromContext(ctx, metadata.TypeKey)
+		payload["subType"] = metadata.GetFromContext(ctx, metadata.SubTypeKey)
+		decodedEmail, err := base64.StdEncoding.DecodeString(metadata.GetFromContext(ctx, metadata.EmailKey))
+		if err == nil {
+			payload["email"] = string(decodedEmail)
+		} else {
+			payload["email"] = metadata.GetFromContext(ctx, metadata.EmailKey)
+		}
 	} else if metadata.GetFromContext(ctx, metadata.UserIDKey) != "" {
 		payload["user"] = metadata.GetFromContext(ctx, metadata.UserIDKey)
 		payload["account"] = metadata.GetFromContext(ctx, metadata.AccountIDKey)
