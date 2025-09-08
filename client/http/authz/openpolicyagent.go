@@ -51,7 +51,14 @@ func (auth *opa) Authorize(ctx context.Context, resourceId, action interface{}, 
 		payload["user"] = metadata.GetFromContext(ctx, metadata.UserIDKey)
 		payload["accounts"] = strings.Split(metadata.GetFromContext(ctx, metadata.AccountIDsKey), ",")
 		payload["account"] = metadata.GetFromContext(ctx, metadata.AccountIDKey)
-		payload["roles"] = strings.Split(metadata.GetFromContext(ctx, metadata.RolesKey), ",")
+		// The M2M roles are always a list (correct). For backwards compatibility set the roles as concatenated string
+		// when a single account is used (machine impersonation).
+		// This is needed to have the same behavior as on non m2m tokens.
+		if payload["account"] == "" {
+			payload["roles"] = strings.Split(metadata.GetFromContext(ctx, metadata.RolesKey), ",")
+		} else {
+			payload["roles"] = metadata.GetFromContext(ctx, metadata.RolesKey)
+		}
 		payload["type"] = metadata.GetFromContext(ctx, metadata.TypeKey)
 		payload["subType"] = metadata.GetFromContext(ctx, metadata.SubTypeKey)
 		decodedEmail, err := base64.StdEncoding.DecodeString(metadata.GetFromContext(ctx, metadata.EmailKey))
