@@ -2,6 +2,8 @@ package grpc
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -18,6 +20,7 @@ type Client struct {
 	conn *grpc.ClientConn
 	name string
 	addr string
+	mu   sync.Mutex
 }
 
 //goland:noinspection GoUnusedExportedFunction
@@ -41,6 +44,9 @@ func (c *Client) Connect() (err error) {
 	if c.name == "" {
 		return errors.New("missing client name")
 	}
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	// do nothing if a ready connection is already available
 	if c.conn != nil {
