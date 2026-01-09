@@ -62,7 +62,7 @@ func (c *Client) Connect() (err error) {
 	if c.addr == "" {
 		return fmt.Errorf("missing address for client '%s'", c.name)
 	}
-	c.conn, err = grpc.Dial(
+	c.conn, err = grpc.NewClient(
 		c.addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainUnaryInterceptor(
