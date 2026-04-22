@@ -2,11 +2,12 @@ package mongodb
 
 import (
 	"context"
-	"github.com/marcoEgger/genki/logger"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 	"time"
+
+	"github.com/marcoEgger/genki/logger"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/v2/mongo/otelmongo"
 )
 
 type MongoDB struct {
@@ -18,9 +19,13 @@ type MongoDB struct {
 //
 //goland:noinspection GoUnusedExportedFunction
 func New(uri string) (*MongoDB, error) {
+	db, err := mongo.Connect(options.Client().SetMonitor(otelmongo.NewMonitor()).ApplyURI(uri))
+	if err != nil {
+		return nil, err
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	db, err := mongo.Connect(ctx, options.Client().SetMonitor(otelmongo.NewMonitor()).ApplyURI(uri))
+	err = db.Ping(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
