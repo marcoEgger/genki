@@ -2,13 +2,14 @@ package cache
 
 import (
 	"context"
+	"time"
+
 	"github.com/go-redis/cache/v8"
 	"github.com/go-redis/redis/extra/redisotel/v8"
 	"github.com/go-redis/redis/v8"
 	"github.com/marcoEgger/genki/config"
 	"github.com/marcoEgger/genki/logger"
 	"github.com/spf13/pflag"
-	"time"
 )
 
 const (
@@ -17,7 +18,7 @@ const (
 )
 
 //goland:noinspection GoUnusedExportedFunction
-func NewRedisCache() *cache.Cache {
+func NewRedisCache(hooks ...redis.Hook) *cache.Cache {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: config.GetString(CacheUrl),
 		DB:   config.GetInt(CacheDatabase),
@@ -27,6 +28,11 @@ func NewRedisCache() *cache.Cache {
 		},
 	})
 	redisClient.AddHook(redisotel.NewTracingHook())
+	if hooks != nil {
+		for _, hook := range hooks {
+			redisClient.AddHook(hook)
+		}
+	}
 	return cache.New(&cache.Options{
 		Redis:      redisClient,
 		LocalCache: cache.NewTinyLFU(5000, time.Minute),
