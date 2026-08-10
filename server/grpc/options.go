@@ -7,7 +7,7 @@ import (
 )
 
 const DefaultPort = "50051"
-const DefaultGracePeriod = 3 * time.Second
+const DefaultGracePeriod = 20 * time.Second
 const DefaultHealthEnabled = true
 const DefaultLoggingInterceptor = true
 const DefaultRequestIdInterceptor = true

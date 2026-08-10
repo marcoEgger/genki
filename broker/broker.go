@@ -3,6 +3,7 @@ package broker
 import (
 	"context"
 	"sync"
+	"time"
 )
 
 // Message is the core structure of the broker. It abstract's away the concrete broker message
@@ -20,6 +21,13 @@ type Broker interface {
 	Disconnect() error
 	Consume(group *sync.WaitGroup)
 	HasConsumer() bool
+}
+
+// GracefulConsumer can stop accepting new messages and wait for in-flight handlers.
+// Used during application shutdown so current work can finish before connections close.
+type GracefulConsumer interface {
+	StopConsumer() error
+	Drain(timeout time.Duration)
 }
 
 // Subscriber can subscribe to exchanges with a routingKey

@@ -3,8 +3,10 @@ package genki
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc/health/grpc_health_v1"
 	"sync"
+	"time"
+
+	"google.golang.org/grpc/health/grpc_health_v1"
 
 	"github.com/marcoEgger/genki/broker"
 	"github.com/marcoEgger/genki/cli"
@@ -13,6 +15,10 @@ import (
 	"github.com/marcoEgger/genki/server/http"
 	genki "github.com/marcoEgger/genki/service"
 )
+
+// DefaultShutdownDrain is how long shutdown waits for in-flight AMQP handlers
+// after the consumer is cancelled (aligned with Linkerd wait).
+const DefaultShutdownDrain = 20 * time.Second
 
 type application struct {
 	servers     []server.Server
@@ -85,12 +91,31 @@ func (svc *application) Run(healthServer grpc_health_v1.HealthServer) error {
 
 	// wait for signal handler to fire and shutdown
 	<-svc.stopChan
-	logger.Info("received OS signal: application is shutting down")
-	if svc.broker != nil {
-		svc.broker.Disconnect()
+	logger.Info("SIGTERM/SIGINT received")
+
+	// Stop taking new AMQP messages first
+	if graceful, ok := svc.broker.(broker.GracefulConsumer); ok {
+		if err := graceful.StopConsumer(); err != nil {
+			logger.Warnf("failed to stop AMQP consumer: %s", err)
+		}
 	}
+
+	// Stop accepting new RPCs / HTTP requests; in-flight work can finish
 	svc.cancel()
+
+	// Wait for in-flight AMQP handlers
+	if graceful, ok := svc.broker.(broker.GracefulConsumer); ok {
+		graceful.Drain(DefaultShutdownDrain)
+	}
+
+	if svc.broker != nil {
+		if err := svc.broker.Disconnect(); err != nil {
+			logger.Warnf("broker disconnect error: %s", err)
+		}
+	}
+
 	svc.wg.Wait()
+	logger.Info("Shutdown complete")
 
 	return nil
 }
