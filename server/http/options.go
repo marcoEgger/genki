@@ -7,7 +7,7 @@ import (
 )
 
 const DefaultPort = "8080"
-const DefaultGracePeriod = 3 * time.Second
+const DefaultGracePeriod = 20 * time.Second
 const DefaultName = "default"
 const DefaultLoggingMiddlewareEnabled = true
 const DefaultPrometheusMiddlewareEnabled = true

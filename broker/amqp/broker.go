@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/pkg/errors"
@@ -23,8 +24,13 @@ type Broker struct {
 	producerDecls  []Declaration
 	consumeContext context.Context
 	stopConsuming  context.CancelFunc
-	waitGroup      *sync.WaitGroup
 	subscriptions  map[string]broker.Handler
+
+	stopping      atomic.Bool
+	inFlight      sync.WaitGroup
+	consumerMu    sync.Mutex
+	consumeCh     *amqp.Channel
+	consumerTag   string
 }
 
 func NewBroker(options ...Option) *Broker {
@@ -74,18 +80,21 @@ func (b *Broker) HasConsumer() bool {
 }
 
 func (b *Broker) Consume(wg *sync.WaitGroup) {
-	b.waitGroup = wg
+	defer wg.Done()
+
 	for {
-		select {
-		case <-b.consumeContext.Done():
+		if b.stopping.Load() || b.consumeContext.Err() != nil {
 			logger.Debug("amqp broker stopped consuming events")
 			return
-		default:
 		}
 
 		if !b.consumeConn.IsConnected() {
 			logger.Infof("amqp consumer connection offline, waiting for reconnect")
 			b.consumeConn.WaitForConnection()
+			if b.stopping.Load() || b.consumeContext.Err() != nil {
+				logger.Debug("amqp broker stopped consuming events")
+				return
+			}
 			logger.Infof("amqp consumer connection back online, consuming events")
 		}
 
@@ -110,7 +119,15 @@ func (b *Broker) Consume(wg *sync.WaitGroup) {
 			continue
 		}
 
+		b.setActiveConsumer(channel, b.opts.ConsumerName)
+
 		for delivery := range deliveries {
+			if b.stopping.Load() {
+				// Stop accepting work; unacked messages are requeued when the channel closes.
+				_ = delivery.Nack(false, true)
+				break
+			}
+
 			routingKey := delivery.RoutingKey
 
 			// TODO: metrics
@@ -120,19 +137,69 @@ func (b *Broker) Consume(wg *sync.WaitGroup) {
 
 				handler = interceptor.SubscriberLoggerInterceptor(handler)
 				handler = interceptor.SubscriberMetadataInterceptor(handler)
-				handler(event)
+
+				b.inFlight.Add(1)
+				func() {
+					defer b.inFlight.Done()
+					handler(event)
+				}()
 			} else {
 				logger.Errorf("handler not defined for %s", routingKey)
 			}
 		}
+
+		b.clearActiveConsumer()
+	}
+}
+
+// StopConsumer cancels the AMQP consumer so no new messages are delivered.
+// In-flight handlers are left running and can be waited on with Drain.
+func (b *Broker) StopConsumer() error {
+	b.stopping.Store(true)
+
+	b.consumerMu.Lock()
+	ch := b.consumeCh
+	tag := b.consumerTag
+	queue := b.opts.SubscriberQueue
+	b.consumerMu.Unlock()
+
+	if ch == nil || tag == "" {
+		logger.Info("no active AMQP consumer to remove")
+		return nil
+	}
+
+	if err := ch.Cancel(tag, false); err != nil {
+		logger.Warnf("unable to cancel AMQP consumer for queue %s: %s", queue, err)
+		return err
+	}
+
+	logger.Infof("Removed consumer from queue %s", queue)
+	return nil
+}
+
+// Drain waits for in-flight message handlers to finish, up to timeout.
+func (b *Broker) Drain(timeout time.Duration) {
+	logger.Infof("Waiting %dms for in-flight work to finish", timeout.Milliseconds())
+
+	done := make(chan struct{})
+	go func() {
+		b.inFlight.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		logger.Info("in-flight AMQP work finished")
+	case <-time.After(timeout):
+		logger.Warnf("AMQP drain timed-out after %s", timeout)
 	}
 }
 
 func (b *Broker) Disconnect() error {
+	b.stopping.Store(true)
 	defer b.stopConsuming()
 
 	if b.HasConsumer() && b.consumeConn != nil {
-		defer b.waitGroup.Done()
 		b.consumeConn.Shutdown()
 		logger.Debug("amqp consumer connection closed")
 	}
@@ -213,4 +280,18 @@ func (b *Broker) ensureConnections() error {
 	}
 	logger.Infof("AMQP session alive")
 	return nil
+}
+
+func (b *Broker) setActiveConsumer(ch *amqp.Channel, tag string) {
+	b.consumerMu.Lock()
+	defer b.consumerMu.Unlock()
+	b.consumeCh = ch
+	b.consumerTag = tag
+}
+
+func (b *Broker) clearActiveConsumer() {
+	b.consumerMu.Lock()
+	defer b.consumerMu.Unlock()
+	b.consumeCh = nil
+	b.consumerTag = ""
 }
