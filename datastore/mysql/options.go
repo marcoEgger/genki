@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	AddressConfigKey   = "mysql-address"
-	TLSCAFileConfigKey = "mysql-tls-ca"
+	AddressConfigKey       = "mysql-address"
+	TLSCAFileConfigKey     = "mysql-tls-ca"
+	TLSServerNameConfigKey = "mysql-tls-server-name"
 )
 
 type Options struct {
@@ -22,6 +23,9 @@ type Options struct {
 	// TLSCAFile is an optional path to a PEM-encoded CA certificate used to
 	// verify the MySQL server certificate.
 	TLSCAFile string
+	// TLSServerName overrides hostname verification when the server certificate
+	// does not match the DSN host (e.g. connect via IP but verify a DNS SAN).
+	TLSServerName string
 }
 
 type Option func(*Options)
@@ -65,12 +69,20 @@ func TLSCAFile(path string) Option {
 	}
 }
 
+// TLSServerName sets the expected server name for TLS hostname verification.
+func TLSServerName(serverName string) Option {
+	return func(options *Options) {
+		options.TLSServerName = serverName
+	}
+}
+
 func Flags() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("mysql", pflag.ContinueOnError)
 	// tls=false keeps the local default usable; production DSNs without tls=
 	// get TLS enabled automatically by New().
 	fs.String(AddressConfigKey, "root:root@tcp(localhost:3306)/database?parseTime=true&tls=false", "mysql connection string")
 	fs.String(TLSCAFileConfigKey, "", "optional PEM CA certificate file for MySQL TLS verification")
+	fs.String(TLSServerNameConfigKey, "", "optional TLS server name override for hostname verification")
 	return fs
 }
 

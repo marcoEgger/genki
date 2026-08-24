@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"strings"
@@ -26,20 +27,9 @@ func ensureTLS(dsn string, opts *Options) (string, error) {
 	}
 
 	if opts.TLSCAFile != "" || !hasTLSParam(dsn) {
-		tlsCfg := &tls.Config{
-			MinVersion: tls.VersionTLS12,
-		}
-
-		if opts.TLSCAFile != "" {
-			pem, err := os.ReadFile(opts.TLSCAFile)
-			if err != nil {
-				return "", fmt.Errorf("read mysql tls ca file: %w", err)
-			}
-			rootCAs := x509.NewCertPool()
-			if ok := rootCAs.AppendCertsFromPEM(pem); !ok {
-				return "", fmt.Errorf("append mysql tls ca certificates from %s", opts.TLSCAFile)
-			}
-			tlsCfg.RootCAs = rootCAs
+		tlsCfg, err := buildTLSConfig(dsn, opts)
+		if err != nil {
+			return "", err
 		}
 
 		if err := mysqldriver.RegisterTLSConfig(tlsConfigName, tlsCfg); err != nil {
@@ -50,6 +40,85 @@ func ensureTLS(dsn string, opts *Options) (string, error) {
 	}
 
 	return dsn, nil
+}
+
+func buildTLSConfig(dsn string, opts *Options) (*tls.Config, error) {
+	tlsCfg := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+	}
+
+	var rootCAs *x509.CertPool
+	if opts.TLSCAFile != "" {
+		pem, err := os.ReadFile(opts.TLSCAFile)
+		if err != nil {
+			return nil, fmt.Errorf("read mysql tls ca file: %w", err)
+		}
+		rootCAs = x509.NewCertPool()
+		if ok := rootCAs.AppendCertsFromPEM(pem); !ok {
+			return nil, fmt.Errorf("append mysql tls ca certificates from %s", opts.TLSCAFile)
+		}
+		tlsCfg.RootCAs = rootCAs
+	}
+
+	if opts.TLSServerName != "" {
+		tlsCfg.ServerName = opts.TLSServerName
+		return tlsCfg, nil
+	}
+
+	if isIPHost(dsnHost(dsn)) {
+		tlsCfg.VerifyConnection = verifyPeerCertChain(rootCAs)
+	}
+
+	return tlsCfg, nil
+}
+
+// verifyPeerCertChain validates the server certificate chain without requiring
+// the connection host to appear in the certificate SANs. This allows connecting
+// via IP while still verifying the server certificate against a trusted CA.
+func verifyPeerCertChain(rootCAs *x509.CertPool) func(tls.ConnectionState) error {
+	return func(state tls.ConnectionState) error {
+		if len(state.PeerCertificates) == 0 {
+			return fmt.Errorf("mysql tls: server did not present a certificate")
+		}
+
+		roots := rootCAs
+		if roots == nil {
+			var err error
+			roots, err = x509.SystemCertPool()
+			if err != nil {
+				return fmt.Errorf("mysql tls: system cert pool: %w", err)
+			}
+		}
+
+		verifyOpts := x509.VerifyOptions{Roots: roots}
+		if len(state.PeerCertificates) > 1 {
+			verifyOpts.Intermediates = x509.NewCertPool()
+			for _, cert := range state.PeerCertificates[1:] {
+				verifyOpts.Intermediates.AddCert(cert)
+			}
+		}
+
+		if _, err := state.PeerCertificates[0].Verify(verifyOpts); err != nil {
+			return fmt.Errorf("mysql tls: verify server certificate: %w", err)
+		}
+		return nil
+	}
+}
+
+func dsnHost(dsn string) string {
+	cfg, err := mysqldriver.ParseDSN(dsn)
+	if err != nil {
+		return ""
+	}
+	host, _, err := net.SplitHostPort(cfg.Addr)
+	if err != nil {
+		return cfg.Addr
+	}
+	return host
+}
+
+func isIPHost(host string) bool {
+	return net.ParseIP(host) != nil
 }
 
 // ensureMultiStatements adds multiStatements=true when missing. Required by
