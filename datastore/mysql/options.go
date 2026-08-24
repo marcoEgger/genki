@@ -1,19 +1,27 @@
 package mysql
 
-
 import (
 	"time"
 
 	"github.com/spf13/pflag"
 )
 
-const AddressConfigKey = "mysql-address"
+const (
+	AddressConfigKey   = "mysql-address"
+	TLSCAFileConfigKey = "mysql-tls-ca"
+)
 
 type Options struct {
 	MigrationPath         string
 	MaxOpenConnections    int
 	MaxIdleConnections    int
 	MaxConnectionLifetime time.Duration
+	// DisableTLS skips automatic TLS enablement. Use only for local setups
+	// that do not support TLS. Prefer setting tls=false in the DSN instead.
+	DisableTLS bool
+	// TLSCAFile is an optional path to a PEM-encoded CA certificate used to
+	// verify the MySQL server certificate.
+	TLSCAFile string
 }
 
 type Option func(*Options)
@@ -42,9 +50,27 @@ func MaxConnectionLifetime(maxLifetime time.Duration) Option {
 	}
 }
 
+// DisableTLS disables automatic TLS for the MySQL connection.
+// Prefer an explicit tls=... DSN parameter when possible.
+func DisableTLS() Option {
+	return func(options *Options) {
+		options.DisableTLS = true
+	}
+}
+
+// TLSCAFile sets a custom CA certificate file used to verify the MySQL server.
+func TLSCAFile(path string) Option {
+	return func(options *Options) {
+		options.TLSCAFile = path
+	}
+}
+
 func Flags() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("mysql", pflag.ContinueOnError)
-	fs.String(AddressConfigKey, "root:root@tcp(localhost:3306)/database?parseTime=true", "mysql connection string")
+	// tls=false keeps the local default usable; production DSNs without tls=
+	// get TLS enabled automatically by New().
+	fs.String(AddressConfigKey, "root:root@tcp(localhost:3306)/database?parseTime=true&tls=false", "mysql connection string")
+	fs.String(TLSCAFileConfigKey, "", "optional PEM CA certificate file for MySQL TLS verification")
 	return fs
 }
 
@@ -61,4 +87,3 @@ func newOptions(opts ...Option) *Options {
 
 	return opt
 }
-

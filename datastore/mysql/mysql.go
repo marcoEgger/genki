@@ -23,11 +23,18 @@ type MySQL struct {
 
 const DriverName = "mysql"
 
-// New will connect to the MySQL server using the given DSN
+// New will connect to the MySQL server using the given DSN.
+// TLS is enabled by default (MinVersion TLS 1.2) unless the DSN already
+// contains a tls= parameter or DisableTLS() is passed.
 //
 //goland:noinspection GoUnusedExportedFunction
 func New(dsn string, options ...Option) (*MySQL, error) {
 	opts := newOptions(options...)
+
+	dsn, err := ensureTLS(dsn, opts)
+	if err != nil {
+		return nil, err
+	}
 
 	//db, err := sqlx.Connect(DriverName, dsn)
 	db, err := splunksql.Open(DriverName, dsn)
