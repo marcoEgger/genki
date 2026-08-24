@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"database/sql"
 	"fmt"
 	"strings"
 
@@ -35,6 +34,7 @@ func New(dsn string, options ...Option) (*MySQL, error) {
 	if err != nil {
 		return nil, err
 	}
+	dsn = ensureMultiStatements(dsn)
 
 	//db, err := sqlx.Connect(DriverName, dsn)
 	db, err := splunksql.Open(DriverName, dsn)
@@ -56,11 +56,11 @@ func New(dsn string, options ...Option) (*MySQL, error) {
 
 // Migrate to a specific version. It's assumed t
 func (m MySQL) Migrate(version uint) error {
-	db, err := sql.Open(DriverName, m.dsn)
+	driver, err := mysql.WithInstance(m.db.DB, &mysql.Config{})
 	if err != nil {
-		return errors.Wrap(err, "unable to open database connection")
+		return errors.Wrap(err, "unable to create migration driver")
 	}
-	driver, err := mysql.WithInstance(db, &mysql.Config{})
+
 	migrations, err := migrate.NewWithDatabaseInstance(
 		fmt.Sprintf("file://%s", m.opts.MigrationPath),
 		DriverName,
@@ -68,6 +68,9 @@ func (m MySQL) Migrate(version uint) error {
 	if err != nil {
 		return errors.Wrap(err, "unable initialize migrations")
 	}
+	defer func() {
+		_, _ = migrations.Close()
+	}()
 
 	err = migrations.Migrate(version)
 	if err != nil {
