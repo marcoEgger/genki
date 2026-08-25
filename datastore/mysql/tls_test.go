@@ -1,8 +1,17 @@
 package mysql
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"math/big"
+	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestEnsureTLS_AddsTLSWhenMissing(t *testing.T) {
@@ -91,9 +100,27 @@ func TestIsIPHost(t *testing.T) {
 	}
 }
 
-func TestBuildTLSConfig_IPHostUsesVerifyConnection(t *testing.T) {
+func TestBuildTLSConfig_WithoutCASkipsVerification(t *testing.T) {
 	dsn := "user:pass@tcp(34.65.29.144:3306)/app?parseTime=true"
 	cfg, err := buildTLSConfig(dsn, &Options{})
+	if err != nil {
+		t.Fatalf("buildTLSConfig: %v", err)
+	}
+	if !cfg.InsecureSkipVerify {
+		t.Fatal("expected InsecureSkipVerify when no CA file is configured")
+	}
+	if cfg.VerifyConnection != nil {
+		t.Fatal("expected no VerifyConnection when no CA file is configured")
+	}
+	if cfg.RootCAs != nil {
+		t.Fatal("expected no RootCAs when no CA file is configured")
+	}
+}
+
+func TestBuildTLSConfig_IPHostWithCAUsesVerifyConnection(t *testing.T) {
+	caFile := writeTempCAFile(t)
+	dsn := "user:pass@tcp(34.65.29.144:3306)/app?parseTime=true"
+	cfg, err := buildTLSConfig(dsn, &Options{TLSCAFile: caFile})
 	if err != nil {
 		t.Fatalf("buildTLSConfig: %v", err)
 	}
@@ -101,7 +128,10 @@ func TestBuildTLSConfig_IPHostUsesVerifyConnection(t *testing.T) {
 		t.Fatal("expected InsecureSkipVerify for IP host so default IP SAN checks are skipped")
 	}
 	if cfg.VerifyConnection == nil {
-		t.Fatal("expected VerifyConnection for IP host")
+		t.Fatal("expected VerifyConnection for IP host with CA")
+	}
+	if cfg.RootCAs == nil {
+		t.Fatal("expected RootCAs when CA file is configured")
 	}
 	if cfg.ServerName != "" {
 		t.Fatalf("expected empty ServerName, got %q", cfg.ServerName)
@@ -109,8 +139,9 @@ func TestBuildTLSConfig_IPHostUsesVerifyConnection(t *testing.T) {
 }
 
 func TestBuildTLSConfig_ServerNameOverride(t *testing.T) {
+	caFile := writeTempCAFile(t)
 	dsn := "user:pass@tcp(34.65.29.144:3306)/app?parseTime=true"
-	cfg, err := buildTLSConfig(dsn, &Options{TLSServerName: "db.example.com"})
+	cfg, err := buildTLSConfig(dsn, &Options{TLSCAFile: caFile, TLSServerName: "db.example.com"})
 	if err != nil {
 		t.Fatalf("buildTLSConfig: %v", err)
 	}
@@ -119,6 +150,9 @@ func TestBuildTLSConfig_ServerNameOverride(t *testing.T) {
 	}
 	if cfg.VerifyConnection != nil {
 		t.Fatal("expected VerifyConnection to be unset when ServerName is provided")
+	}
+	if cfg.InsecureSkipVerify {
+		t.Fatal("expected hostname verification when ServerName is provided")
 	}
 }
 
@@ -129,4 +163,38 @@ func TestDSNHost(t *testing.T) {
 	if got := dsnHost("user:pass@tcp(db.example.com:3306)/app"); got != "db.example.com" {
 		t.Fatalf("expected db.example.com, got %q", got)
 	}
+}
+
+func writeTempCAFile(t *testing.T) string {
+	t.Helper()
+	cert, err := generateTestCA()
+	if err != nil {
+		t.Fatalf("generate test ca: %v", err)
+	}
+	path := t.TempDir() + "/server-ca.pem"
+	if err := os.WriteFile(path, cert, 0o600); err != nil {
+		t.Fatalf("write temp ca file: %v", err)
+	}
+	return path
+}
+
+func generateTestCA() ([]byte, error) {
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return nil, err
+	}
+	template := &x509.Certificate{
+		SerialNumber:          big.NewInt(1),
+		Subject:               pkix.Name{CommonName: "test-ca"},
+		NotBefore:             time.Now().Add(-time.Hour),
+		NotAfter:              time.Now().Add(24 * time.Hour),
+		IsCA:                  true,
+		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageDigitalSignature,
+		BasicConstraintsValid: true,
+	}
+	der, err := x509.CreateCertificate(rand.Reader, template, template, &key.PublicKey, key)
+	if err != nil {
+		return nil, err
+	}
+	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der}), nil
 }

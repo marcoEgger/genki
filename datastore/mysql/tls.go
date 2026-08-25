@@ -15,8 +15,9 @@ import (
 const tlsConfigName = "genki"
 
 // ensureTLS enables TLS on the DSN unless disabled or explicitly set to tls=false.
-// When TLSCAFile is configured, a registered tls.Config is always applied and
-// overrides any existing tls= DSN parameter so the CA file is actually used.
+// When TLSCAFile is configured, a registered tls.Config verifies the server against
+// that CA. Without a CA file, TLS is still enabled but certificate verification is
+// skipped (equivalent to tls=skip-verify).
 func ensureTLS(dsn string, opts *Options) (string, error) {
 	if opts.DisableTLS {
 		return dsn, nil
@@ -47,18 +48,22 @@ func buildTLSConfig(dsn string, opts *Options) (*tls.Config, error) {
 		MinVersion: tls.VersionTLS12,
 	}
 
-	var rootCAs *x509.CertPool
-	if opts.TLSCAFile != "" {
-		pem, err := os.ReadFile(opts.TLSCAFile)
-		if err != nil {
-			return nil, fmt.Errorf("read mysql tls ca file: %w", err)
-		}
-		rootCAs = x509.NewCertPool()
-		if ok := rootCAs.AppendCertsFromPEM(pem); !ok {
-			return nil, fmt.Errorf("append mysql tls ca certificates from %s", opts.TLSCAFile)
-		}
-		tlsCfg.RootCAs = rootCAs
+	// Without a CA file, enable encrypted TLS but skip certificate verification
+	// (equivalent to tls=skip-verify). Useful for local development.
+	if opts.TLSCAFile == "" {
+		tlsCfg.InsecureSkipVerify = true
+		return tlsCfg, nil
 	}
+
+	pem, err := os.ReadFile(opts.TLSCAFile)
+	if err != nil {
+		return nil, fmt.Errorf("read mysql tls ca file: %w", err)
+	}
+	rootCAs := x509.NewCertPool()
+	if ok := rootCAs.AppendCertsFromPEM(pem); !ok {
+		return nil, fmt.Errorf("append mysql tls ca certificates from %s", opts.TLSCAFile)
+	}
+	tlsCfg.RootCAs = rootCAs
 
 	if opts.TLSServerName != "" {
 		tlsCfg.ServerName = opts.TLSServerName
@@ -86,16 +91,7 @@ func verifyPeerCertChain(rootCAs *x509.CertPool) func(tls.ConnectionState) error
 			return fmt.Errorf("mysql tls: server did not present a certificate")
 		}
 
-		roots := rootCAs
-		if roots == nil {
-			var err error
-			roots, err = x509.SystemCertPool()
-			if err != nil {
-				return fmt.Errorf("mysql tls: system cert pool: %w", err)
-			}
-		}
-
-		verifyOpts := x509.VerifyOptions{Roots: roots}
+		verifyOpts := x509.VerifyOptions{Roots: rootCAs}
 		if len(state.PeerCertificates) > 1 {
 			verifyOpts.Intermediates = x509.NewCertPool()
 			for _, cert := range state.PeerCertificates[1:] {
