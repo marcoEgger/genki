@@ -97,6 +97,9 @@ func TestBuildTLSConfig_IPHostUsesVerifyConnection(t *testing.T) {
 	if err != nil {
 		t.Fatalf("buildTLSConfig: %v", err)
 	}
+	if !cfg.InsecureSkipVerify {
+		t.Fatal("expected InsecureSkipVerify for IP host so default IP SAN checks are skipped")
+	}
 	if cfg.VerifyConnection == nil {
 		t.Fatal("expected VerifyConnection for IP host")
 	}

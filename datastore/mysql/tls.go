@@ -66,6 +66,11 @@ func buildTLSConfig(dsn string, opts *Options) (*tls.Config, error) {
 	}
 
 	if isIPHost(dsnHost(dsn)) {
+		// The MySQL driver sets ServerName to the DSN host. For IP hosts that
+		// causes hostname verification against IP SANs and fails before any
+		// custom VerifyConnection runs. Skip default hostname checks and verify
+		// the certificate chain against the configured CA instead.
+		tlsCfg.InsecureSkipVerify = true
 		tlsCfg.VerifyConnection = verifyPeerCertChain(rootCAs)
 	}
 
