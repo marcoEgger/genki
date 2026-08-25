@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 
@@ -56,7 +57,14 @@ func New(dsn string, options ...Option) (*MySQL, error) {
 
 // Migrate to a specific version. It's assumed t
 func (m MySQL) Migrate(version uint) error {
-	driver, err := mysql.WithInstance(m.db.DB, &mysql.Config{})
+	// Use a dedicated connection so migrate.Close() does not close the app pool.
+	db, err := sql.Open(DriverName, m.dsn)
+	if err != nil {
+		return errors.Wrap(err, "unable to open database connection")
+	}
+	defer db.Close()
+
+	driver, err := mysql.WithInstance(db, &mysql.Config{})
 	if err != nil {
 		return errors.Wrap(err, "unable to create migration driver")
 	}
